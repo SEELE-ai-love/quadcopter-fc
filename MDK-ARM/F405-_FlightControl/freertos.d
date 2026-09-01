@@ -42,3 +42,5 @@ f405-_flightcontrol\freertos.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_ha
 f405-_flightcontrol\freertos.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_uart.h
 f405-_flightcontrol\freertos.o: ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2/cmsis_os.h
 f405-_flightcontrol\freertos.o: ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2/cmsis_os2.h
+f405-_flightcontrol\freertos.o: ../Core/Inc/tim.h
+f405-_flightcontrol\freertos.o: D:\Keil_v5\ARM\ARMCC\Bin\..\include\stdio.h

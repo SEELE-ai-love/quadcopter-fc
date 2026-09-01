@@ -19,16 +19,22 @@
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
 #include "cmsis_os.h"
+#include "tim.h"
 #include "usart.h"
 #include "gpio.h"
+#include <stdio.h>
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include <stdio.h>
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
 /* USER CODE BEGIN PTD */
+uint8_t uart4_recv;
+uint8_t uart1_recv;
+
+
 
 /* USER CODE END PTD */
 
@@ -60,6 +66,16 @@ void MX_FREERTOS_Init(void);
 
 /* USER CODE END 0 */
 
+/* USER CODE BEGIN 4 */
+
+UART_HandleTypeDef *DebugSerial = &huart1;
+
+//实现printf、scanf函数
+int fputc(int ch,FILE* stream)
+{
+	while( HAL_OK != HAL_UART_Transmit(DebugSerial,(const uint8_t *)&ch,1,100));
+	return ch;
+}
 /**
   * @brief  The application entry point.
   * @retval int
@@ -90,12 +106,17 @@ int main(void)
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
   MX_USART1_UART_Init();
+  MX_UART4_Init();
+  MX_TIM6_Init();
   /* USER CODE BEGIN 2 */
-
+//打开串口1（type-c）和串口4（蓝牙）
+HAL_UART_Receive_IT(&huart1,&uart1_recv,1);
+HAL_UART_Receive_IT(&huart4,&uart4_recv,1);
   /* USER CODE END 2 */
 
   /* Init scheduler */
-  osKernelInitialize();  /* Call init function for freertos objects (in cmsis_os2.c) */
+  osKernelInitialize();  
+	/* Call init function for freertos objects (in cmsis_os2.c) */
   MX_FREERTOS_Init();
 
   /* Start scheduler */

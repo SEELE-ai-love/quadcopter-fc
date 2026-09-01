@@ -3,6 +3,7 @@
 "f405-_flightcontrol\main.o"
 "f405-_flightcontrol\gpio.o"
 "f405-_flightcontrol\freertos.o"
+"f405-_flightcontrol\tim.o"
 "f405-_flightcontrol\usart.o"
 "f405-_flightcontrol\stm32f4xx_it.o"
 "f405-_flightcontrol\stm32f4xx_hal_msp.o"
@@ -34,6 +35,7 @@
 "f405-_flightcontrol\cmsis_os2.o"
 "f405-_flightcontrol\heap_4.o"
 "f405-_flightcontrol\port.o"
+"f405-_flightcontrol\uart_callback.o"
 --library_type=microlib --strict --scatter "F405-_FlightControl\F405-_FlightControl.sct"
 --summary_stderr --info summarysizes --map --load_addr_map_info --xref --callgraph --symbols
 --info sizes --info totals --info unused --info veneers

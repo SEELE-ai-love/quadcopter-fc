@@ -25,7 +25,8 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include "tim.h"
+#include <stdio.h>
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -36,6 +37,7 @@
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
 
+#define userconfig_RTOS_DEBUG  1//是否开启调试任务
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -58,6 +60,10 @@ const osThreadAttr_t defaultTask_attributes = {
 /* Private function prototypes -----------------------------------------------*/
 /* USER CODE BEGIN FunctionPrototypes */
 
+#if (1 ==userconfig_RTOS_DEBUG )
+void RTOSDebugTask(void *param);
+#endif //如果是1，执行调试RTOSDebugTask(void *param);
+
 /* USER CODE END FunctionPrototypes */
 
 void StartDefaultTask(void *argument);
@@ -75,13 +81,29 @@ void vApplicationMallocFailedHook(void);
 /* Functions needed when configGENERATE_RUN_TIME_STATS is on */
 __weak void configureTimerForRunTimeStats(void)
 {
-//��ʼ����ʱ�����ṩ�� getRunTimeCounterValue ����ʹ��
+  //定时器TIM6用来给 getRunTimeCounterValue（）
+	HAL_TIM_Base_Start(&htim6);
 }
 
 __weak unsigned long getRunTimeCounterValue(void)
 {
-	//ͳ��CPUռ����
-return 0;
+  static unsigned long time = 0 ;
+	static uint16_t lasttime = 0;
+	static uint16_t nowtime = 0;
+	
+	nowtime = TIM6->CNT; //获得当前计数值
+	
+	//如果本次计数值小于上次计数值，说明发生了定时器计数溢出
+	if( nowtime < lasttime )
+	{
+		time += (nowtime + 0xffff - lasttime); //溢出后的时间增量
+	}		
+	else time += ( nowtime - lasttime ) ; //未发生溢出，增量为本次时间-上次时间
+	
+	lasttime = nowtime;
+	
+	return time;
+	//计算CPU的占用率
 }
 /* USER CODE END 1 */
 
@@ -97,8 +119,7 @@ void vApplicationIdleHook( void )
    important that vApplicationIdleHook() is permitted to return to its calling
    function, because it is the responsibility of the idle task to clean up
    memory allocated by the kernel to any task that has since been deleted. */
-	//��������ص����������Ӻ���
-	//��������ϵͳ�������Ҫ���ڴ�
+    //任务回调函数
 }
 /* USER CODE END 2 */
 
@@ -108,8 +129,9 @@ void vApplicationStackOverflowHook(xTaskHandle xTask, signed char *pcTaskName)
    /* Run time stack overflow checking is performed if
    configCHECK_FOR_STACK_OVERFLOW is defined to 1 or 2. This hook function is
    called if a stack overflow is detected. */
-	//��������Ƿ���ջ���
-	//����ջ������������������ִ�к���
+	//检测是否发生栈溢出
+	printf("%s stack overflow\r\n",pcTaskName);
+
 }
 /* USER CODE END 4 */
 
@@ -127,8 +149,8 @@ void vApplicationMallocFailedHook(void)
    to query the size of free heap space that remains (although it does not
    provide information on how the remaining heap might be fragmented). */
 	
-	//�ڴ����ʧ�ܻص�����
-	//�ڴ����ʧ�������������
+  //内存分配失败函数
+	 printf("malloc failed.check heapsize\r\n");
 }
 /* USER CODE END 5 */
 
@@ -164,6 +186,14 @@ void MX_FREERTOS_Init(void) {
 
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
+	
+	//创建Free RTOS调试任务
+ #if ( 1 == userconfig_RTOS_DEBUG )
+	 static uint16_t delaytime = 5000;//打印时间间隔，单位tick
+	 xTaskCreate(RTOSDebugTask,"DebugTask",128, &delaytime ,osPriorityAboveNormal,NULL);
+ #endif
+	
+	
   /* USER CODE END RTOS_THREADS */
 
   /* USER CODE BEGIN RTOS_EVENTS */
@@ -187,14 +217,40 @@ void StartDefaultTask(void *argument)
   {
 		HAL_GPIO_TogglePin(GPIOB,GPIO_PIN_14);
 		HAL_GPIO_TogglePin(GPIOB,GPIO_PIN_15);
-		vTaskDelay(pdMS_TO_TICKS(300));
-    osDelay(1);
+		vTaskDelay(pdMS_TO_TICKS(700));
   }
   /* USER CODE END StartDefaultTask */
 }
 
 /* Private application code --------------------------------------------------*/
 /* USER CODE BEGIN Application */
+#if ( 1 == userconfig_RTOS_DEBUG )
+void RTOSDebugTask(void *param)
+{
+	uint16_t* delaytime = (uint16_t*)param;
+	static char showbuf[500];
+	
+	while( 1 )
+	{
+		//打印CPU占比
+		vTaskGetRunTimeStats(showbuf);
+		printf("TaskName\tUseTime\tCPU\r\n");
+		printf("%s\r\n",showbuf);
+		vTaskDelay(*delaytime);
 
+		//打印剩余任务栈大小,单位word
+		vTaskList(showbuf);
+		printf("TaskName\tTaskState\tTaskPrio\tStackSize\tTaskNum\r\n");
+		printf("%s\r\n",showbuf);
+		vTaskDelay(*delaytime);
+
+		
+
+		//打印剩余的堆区大小,单位bytes
+		printf("free heap size : %d bytes\r\n\r\n",xPortGetFreeHeapSize());
+		vTaskDelay(*delaytime);
+	}
+}
+#endif
 /* USER CODE END Application */
 
