@@ -1,0 +1,27 @@
+# Keil / MDK-ARM
+firmware/project/**/Listings/
+firmware/project/**/Objects/
+firmware/project/**/DebugConfig/
+firmware/project/**/*.uvguix.*
+firmware/project/**/*.uvopt
+firmware/project/**/*.uvgui
+firmware/project/**/*.scvd
+firmware/project/**/*.dep
+firmware/project/**/JLinkLog.txt
+
+# STM32CubeMX / CubeIDE
+firmware/project/**/*.user
+firmware/project/**/build/
+
+# MATLAB
+simulation/matlab/*.asv
+simulation/matlab/*.m~*
+
+# OS / editor
+Thumbs.db
+Desktop.ini
+.DS_Store
+.vscode/
+.idea/
+*.swp
+*~
