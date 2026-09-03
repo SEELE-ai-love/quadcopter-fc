@@ -1,4 +1,4 @@
-# simulation/matlab/README
+# Matlab/README
 
 ## MATLAB simulation
 
