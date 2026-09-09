@@ -35,6 +35,8 @@ f405-_flightcontrol\freertos.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_ha
 f405-_flightcontrol\freertos.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_flash.h
 f405-_flightcontrol\freertos.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_flash_ex.h
 f405-_flightcontrol\freertos.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_flash_ramfunc.h
+f405-_flightcontrol\freertos.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_i2c.h
+f405-_flightcontrol\freertos.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_i2c_ex.h
 f405-_flightcontrol\freertos.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_pwr.h
 f405-_flightcontrol\freertos.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_pwr_ex.h
 f405-_flightcontrol\freertos.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_tim.h
@@ -42,5 +44,13 @@ f405-_flightcontrol\freertos.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_ha
 f405-_flightcontrol\freertos.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_uart.h
 f405-_flightcontrol\freertos.o: ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2/cmsis_os.h
 f405-_flightcontrol\freertos.o: ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2/cmsis_os2.h
+f405-_flightcontrol\freertos.o: ../Core/Inc/i2c.h
 f405-_flightcontrol\freertos.o: ../Core/Inc/tim.h
 f405-_flightcontrol\freertos.o: D:\Keil_v5\ARM\ARMCC\Bin\..\include\stdio.h
+f405-_flightcontrol\freertos.o: ..\F570_BSP\Inc\icm20948_reg.h
+f405-_flightcontrol\freertos.o: ..\F570_BSP\Inc\Bsp_imu.h
+f405-_flightcontrol\freertos.o: ../Core/Inc/usart.h
+f405-_flightcontrol\freertos.o: D:\Keil_v5\ARM\ARMCC\Bin\..\include\math.h
+f405-_flightcontrol\freertos.o: ..\F570_BSP\Inc\attitude_task.h
+f405-_flightcontrol\freertos.o: D:\Keil_v5\ARM\ARMCC\Bin\..\include\string.h
+f405-_flightcontrol\freertos.o: D:\Keil_v5\ARM\ARMCC\Bin\..\include\stdlib.h

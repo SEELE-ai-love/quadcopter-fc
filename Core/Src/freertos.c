@@ -22,11 +22,16 @@
 #include "task.h"
 #include "main.h"
 #include "cmsis_os.h"
-
+#include "i2c.h"
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "tim.h"
 #include <stdio.h>
+#include "icm20948_reg.h"
+#include "Bsp_imu.h"
+#include "usart.h"
+#include "math.h"
+#include "attitude_task.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -37,7 +42,7 @@
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
 
-#define userconfig_RTOS_DEBUG  1//是否开启调试任务
+#define userconfig_RTOS_DEBUG  0//是否开启调试任务
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -47,13 +52,18 @@
 
 /* Private variables ---------------------------------------------------------*/
 /* USER CODE BEGIN Variables */
+/* USER CODE BEGIN 0 */
+#include <string.h>
+#include <stdlib.h>
 
+// VOFA+ 可调参数（初始为 0）
+/* USER CODE END 0 */
 /* USER CODE END Variables */
 /* Definitions for defaultTask */
 osThreadId_t defaultTaskHandle;
 const osThreadAttr_t defaultTask_attributes = {
   .name = "defaultTask",
-  .stack_size = 128 * 4,
+  .stack_size = 512 * 4,
   .priority = (osPriority_t) osPriorityAboveNormal,
 };
 
@@ -105,6 +115,7 @@ __weak unsigned long getRunTimeCounterValue(void)
 	return time;
 	//计算CPU的占用率
 }
+
 /* USER CODE END 1 */
 
 /* USER CODE BEGIN 2 */
@@ -121,9 +132,11 @@ void vApplicationIdleHook( void )
    memory allocated by the kernel to any task that has since been deleted. */
     //任务回调函数
 }
+
 /* USER CODE END 2 */
 
 /* USER CODE BEGIN 4 */
+
 void vApplicationStackOverflowHook(xTaskHandle xTask, signed char *pcTaskName)
 {
    /* Run time stack overflow checking is performed if
@@ -133,6 +146,7 @@ void vApplicationStackOverflowHook(xTaskHandle xTask, signed char *pcTaskName)
 	printf("%s stack overflow\r\n",pcTaskName);
 
 }
+
 /* USER CODE END 4 */
 
 /* USER CODE BEGIN 5 */
@@ -152,6 +166,7 @@ void vApplicationMallocFailedHook(void)
   //内存分配失败函数
 	 printf("malloc failed.check heapsize\r\n");
 }
+
 /* USER CODE END 5 */
 
 /**
@@ -188,15 +203,16 @@ void MX_FREERTOS_Init(void) {
   /* add threads, ... */
 	
 	//创建Free RTOS调试任务
- #if ( 1 == userconfig_RTOS_DEBUG )
-	 static uint16_t delaytime = 5000;//打印时间间隔，单位tick
-	 xTaskCreate(RTOSDebugTask,"DebugTask",128, &delaytime ,osPriorityAboveNormal,NULL);
- #endif
+// #if ( 1 == userconfig_RTOS_DEBUG )
+//	 static uint16_t delaytime = 5000;//打印时间间隔，单位tick
+//	 xTaskCreate(RTOSDebugTask,"DebugTask",128, &delaytime ,osPriorityAboveNormal,NULL);
+// #endif
 	
 	
   /* USER CODE END RTOS_THREADS */
 
   /* USER CODE BEGIN RTOS_EVENTS */
+	xTaskCreate(attitude_task,"Attitude", 512, NULL, 3, NULL);
   /* add events, ... */
   /* USER CODE END RTOS_EVENTS */
 
@@ -208,49 +224,94 @@ void MX_FREERTOS_Init(void) {
   * @param  argument: Not used
   * @retval None
   */
-/* USER CODE END Header_StartDefaultTask */
+/* USER CODE BEGIN StartDefaultTask */
 void StartDefaultTask(void *argument)
 {
-  /* USER CODE BEGIN StartDefaultTask */
-  /* Infinite loop */
-  for(;;)
-  {
-		HAL_GPIO_TogglePin(GPIOB,GPIO_PIN_14);
-		HAL_GPIO_TogglePin(GPIOB,GPIO_PIN_15);
-		vTaskDelay(pdMS_TO_TICKS(700));
-  }
-  /* USER CODE END StartDefaultTask */
+    /* USER CODE BEGIN StartDefaultTask */
+    // 初始化传感器（只做一次）
+    while (!ICM20948_Init(&hi2c1)) {
+        printf("ICM20948 init failed, retrying...\r\n");
+        HAL_Delay(200);
+    }
+
+    // 然后这个任务什么都不做，让给 attitude_task 去算姿态
+    for (;;)
+    {
+        vTaskDelay(pdMS_TO_TICKS(1000));
+    }
+    /* USER CODE END StartDefaultTask */
 }
 
+//void StartDefaultTask(void *argument)
+//{
+//  /* USER CODE BEGIN StartDefaultTask */
+//  /* Infinite loop */
+////uint8_t iic_recv = 0xFF;
+//	{
+//    IMU_DATA_T imu = {0};
+//    float roll, pitch, yaw;
+//    float dt = 0.01f;
+//    //【修复】原来不管ICM20948_Init成不成功都直接往下跑，现在必须检查返回值
+//    while (!ICM20948_Init(&hi2c1)) {
+//        printf("ICM20948 init failed, retrying...\r\n");
+//        HAL_Delay(200);   //失败就等一下再试，不要疯狂重试占满CPU
+//    }
+//  for(;;)
+//  {
+//// ==========================================
+//		// 打印姿态角到上位机，并且使用三维立方体和曲线图进行查看
+//// ==========================================
+//		 // 1. 读传感器
+//        //【修复】原来不管读成不成功都直接往下用imu的数据，现在读失败就跳过这一次，
+//        //不拿垃圾/陈旧数据去更新姿态，等下一个10ms周期再试
+//        if (ICM20948_Update(&imu, &hi2c1)) {
+//            // 2. 姿态解算（四元数 + Mahony）
+//            Quaternation_Update(imu.gyro.x, imu.gyro.y, imu.gyro.z,
+//                          imu.accel.x, imu.accel.y, imu.accel.z,
+//                         dt, &attitude);
+//            // 3. 转欧拉角
+//            Quaternion_ToEuler(&attitude, &roll, &pitch, &yaw);
+//            // ===========================
+//            // 4. 关键：发给 VOFA+
+//            // ===========================
+//            printf("%.3f,%.3f,%.3f\r\n", roll, pitch, yaw);//滚转X，俯仰Y，偏航Z
+//        } else {
+//            printf("IMU read failed, skip this cycle\r\n");
+//        }
+//        vTaskDelay(pdMS_TO_TICKS(10));
+//  }
+//  /* USER CODE END StartDefaultTask */
+//}
+//	}
 /* Private application code --------------------------------------------------*/
 /* USER CODE BEGIN Application */
-#if ( 1 == userconfig_RTOS_DEBUG )
-void RTOSDebugTask(void *param)
-{
-	uint16_t* delaytime = (uint16_t*)param;
-	static char showbuf[500];
-	
-	while( 1 )
-	{
-		//打印CPU占比
-		vTaskGetRunTimeStats(showbuf);
-		printf("TaskName\tUseTime\tCPU\r\n");
-		printf("%s\r\n",showbuf);
-		vTaskDelay(*delaytime);
+//#if ( 1 == userconfig_RTOS_DEBUG )
+//void RTOSDebugTask(void *param)
+//{
+//	uint16_t* delaytime = (uint16_t*)param;
+//	static char showbuf[500];
+//	
+//	while( 1 )
+//	{
+//		//打印CPU占比
+//		vTaskGetRunTimeStats(showbuf);
+//		printf("TaskName\tUseTime\tCPU\r\n");
+//		printf("%s\r\n",showbuf);
+//		vTaskDelay(*delaytime);
 
-		//打印剩余任务栈大小,单位word
-		vTaskList(showbuf);
-		printf("TaskName\tTaskState\tTaskPrio\tStackSize\tTaskNum\r\n");
-		printf("%s\r\n",showbuf);
-		vTaskDelay(*delaytime);
+//		//打印剩余任务栈大小,单位word
+//		vTaskList(showbuf);
+//		printf("TaskName\tTaskState\tTaskPrio\tStackSize\tTaskNum\r\n");
+//		printf("%s\r\n",showbuf);
+//		vTaskDelay(*delaytime);
 
-		
+//		
 
-		//打印剩余的堆区大小,单位bytes
-		printf("free heap size : %d bytes\r\n\r\n",xPortGetFreeHeapSize());
-		vTaskDelay(*delaytime);
-	}
-}
-#endif
+//		//打印剩余的堆区大小,单位bytes
+//		printf("free heap size : %d bytes\r\n\r\n",xPortGetFreeHeapSize());
+//		vTaskDelay(*delaytime);
+//	}
+//}
+//#endif
 /* USER CODE END Application */
 
