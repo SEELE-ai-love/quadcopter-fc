@@ -1,5 +1,5 @@
 f405-_flightcontrol\serialpllt.o: ..\F570_BSP\SerialPllt.c
-f405-_flightcontrol\serialpllt.o: ..\F570_BSP\Inc\SerialPlot.h
+f405-_flightcontrol\serialpllt.o: ../F570_BSP/Inc/SerialPlot.h
 f405-_flightcontrol\serialpllt.o: ../Core/Inc/usart.h
 f405-_flightcontrol\serialpllt.o: ../Core/Inc/main.h
 f405-_flightcontrol\serialpllt.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal.h

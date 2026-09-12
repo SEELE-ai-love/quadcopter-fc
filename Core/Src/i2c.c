@@ -19,16 +19,21 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "i2c.h"
+
 /* USER CODE BEGIN 0 */
-#include "Bsp_iic.h"   //【新增，写在USER CODE区域内，重新生成不会丢】
+#include "Bsp_iic.h"   //锟斤拷锟斤拷锟斤拷锟斤拷写锟斤拷USER CODE锟斤拷锟斤拷锟节ｏ拷锟斤拷锟斤拷锟斤拷锟缴诧拷锟结丢锟斤拷
 /* USER CODE END 0 */
+
 I2C_HandleTypeDef hi2c1;
+
 /* I2C1 init function */
 void MX_I2C1_Init(void)
 {
+
   /* USER CODE BEGIN I2C1_Init 0 */
-  I2C_BusRecovery();   //【新增】先敲醒可能卡死的从设备，再走下面CubeMX生成的正常初始化
+  I2C_BusRecovery();   //锟斤拷锟斤拷锟斤拷锟斤拷锟斤拷锟斤拷锟窖匡拷锟杰匡拷锟斤拷锟侥达拷锟借备锟斤拷锟斤拷锟斤拷锟斤拷锟斤拷CubeMX锟斤拷锟缴碉拷锟斤拷锟斤拷锟斤拷始锟斤拷
   /* USER CODE END I2C1_Init 0 */
+
   /* USER CODE BEGIN I2C1_Init 1 */
   /* USER CODE END I2C1_Init 1 */
   hi2c1.Instance = I2C1;
@@ -46,14 +51,18 @@ void MX_I2C1_Init(void)
   }
   /* USER CODE BEGIN I2C1_Init 2 */
   /* USER CODE END I2C1_Init 2 */
+
 }
+
 void HAL_I2C_MspInit(I2C_HandleTypeDef* i2cHandle)
 {
+
   GPIO_InitTypeDef GPIO_InitStruct = {0};
   if(i2cHandle->Instance==I2C1)
   {
   /* USER CODE BEGIN I2C1_MspInit 0 */
   /* USER CODE END I2C1_MspInit 0 */
+
     __HAL_RCC_GPIOB_CLK_ENABLE();
     /**I2C1 GPIO Configuration
     PB6     ------> I2C1_SCL
@@ -62,35 +71,40 @@ void HAL_I2C_MspInit(I2C_HandleTypeDef* i2cHandle)
     GPIO_InitStruct.Pin = GPIO_PIN_6|GPIO_PIN_7;
     GPIO_InitStruct.Mode = GPIO_MODE_AF_OD;
     GPIO_InitStruct.Pull = GPIO_NOPULL;
-    /* 这一行保持CubeMX原样，不要在这里手动改成GPIO_PULLUP——
-     * 如果要改上拉，请回CubeMX图形界面里，在这个引脚的GPIO设置里改，
-     * 让.ioc文件记住这个配置，重新生成代码时才不会被冲掉 */
     GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
     GPIO_InitStruct.Alternate = GPIO_AF4_I2C1;
     HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+
     /* I2C1 clock enable */
     __HAL_RCC_I2C1_CLK_ENABLE();
   /* USER CODE BEGIN I2C1_MspInit 1 */
   /* USER CODE END I2C1_MspInit 1 */
   }
 }
+
 void HAL_I2C_MspDeInit(I2C_HandleTypeDef* i2cHandle)
 {
+
   if(i2cHandle->Instance==I2C1)
   {
   /* USER CODE BEGIN I2C1_MspDeInit 0 */
   /* USER CODE END I2C1_MspDeInit 0 */
     /* Peripheral clock disable */
     __HAL_RCC_I2C1_CLK_DISABLE();
+
     /**I2C1 GPIO Configuration
     PB6     ------> I2C1_SCL
     PB7     ------> I2C1_SDA
     */
     HAL_GPIO_DeInit(GPIOB, GPIO_PIN_6);
+
     HAL_GPIO_DeInit(GPIOB, GPIO_PIN_7);
+
   /* USER CODE BEGIN I2C1_MspDeInit 1 */
   /* USER CODE END I2C1_MspDeInit 1 */
   }
 }
+
 /* USER CODE BEGIN 1 */
 /* USER CODE END 1 */
+

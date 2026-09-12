@@ -3,6 +3,7 @@
 "f405-_flightcontrol\main.o"
 "f405-_flightcontrol\gpio.o"
 "f405-_flightcontrol\freertos.o"
+"f405-_flightcontrol\dma.o"
 "f405-_flightcontrol\i2c.o"
 "f405-_flightcontrol\tim.o"
 "f405-_flightcontrol\usart.o"
@@ -42,6 +43,8 @@
 "f405-_flightcontrol\bsp_imu.o"
 "f405-_flightcontrol\serialpllt.o"
 "f405-_flightcontrol\attitude_task.o"
+"f405-_flightcontrol\control_task.o"
+"f405-_flightcontrol\dshot.o"
 "f405-_flightcontrol\uart_callback.o"
 --library_type=microlib --strict --scatter "F405-_FlightControl\F405-_FlightControl.sct"
 --summary_stderr --info summarysizes --map --load_addr_map_info --xref --callgraph --symbols

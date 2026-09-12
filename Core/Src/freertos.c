@@ -22,7 +22,7 @@
 #include "task.h"
 #include "main.h"
 #include "cmsis_os.h"
-#include "i2c.h"
+
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "tim.h"
@@ -32,6 +32,8 @@
 #include "usart.h"
 #include "math.h"
 #include "attitude_task.h"
+#include "Dshot.h"
+#include "Control_task.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -63,8 +65,8 @@
 osThreadId_t defaultTaskHandle;
 const osThreadAttr_t defaultTask_attributes = {
   .name = "defaultTask",
-  .stack_size = 512 * 4,
-  .priority = (osPriority_t) osPriorityAboveNormal,
+  .stack_size = 128 * 4,
+  .priority = (osPriority_t) osPriorityLow,//osPriorityAboveNormal改变优先级了
 };
 
 /* Private function prototypes -----------------------------------------------*/
@@ -213,6 +215,7 @@ void MX_FREERTOS_Init(void) {
 
   /* USER CODE BEGIN RTOS_EVENTS */
 	xTaskCreate(attitude_task,"Attitude", 512, NULL, 3, NULL);
+	xTaskCreate(control_task,"Control",512,NULL,2,NULL);
   /* add events, ... */
   /* USER CODE END RTOS_EVENTS */
 
@@ -224,65 +227,25 @@ void MX_FREERTOS_Init(void) {
   * @param  argument: Not used
   * @retval None
   */
-/* USER CODE BEGIN StartDefaultTask */
+  /* USER CODE BEGIN StartDefaultTask */
 void StartDefaultTask(void *argument)
 {
-    /* USER CODE BEGIN StartDefaultTask */
-    // 初始化传感器（只做一次）
-    while (!ICM20948_Init(&hi2c1)) {
-        printf("ICM20948 init failed, retrying...\r\n");
-        HAL_Delay(200);
-    }
-
-    // 然后这个任务什么都不做，让给 attitude_task 去算姿态
-    for (;;)
+	    for (;;)
     {
         vTaskDelay(pdMS_TO_TICKS(1000));
-    }
-    /* USER CODE END StartDefaultTask */
+    }                                                                                 
+    /* USER CODE BEGIN StartDefaultTask */
+    // 初始化传感器（只做一次）
+//    while (!ICM20948_Init(&hi2c1)) {
+//    }
+//    // 然后这个任务什么都不做，让给 attitude_task 去算姿态
+//    for (;;)
+//    {
+//    }
+	  vTaskDelete(NULL);
+  /* USER CODE END StartDefaultTask */
 }
 
-//void StartDefaultTask(void *argument)
-//{
-//  /* USER CODE BEGIN StartDefaultTask */
-//  /* Infinite loop */
-////uint8_t iic_recv = 0xFF;
-//	{
-//    IMU_DATA_T imu = {0};
-//    float roll, pitch, yaw;
-//    float dt = 0.01f;
-//    //【修复】原来不管ICM20948_Init成不成功都直接往下跑，现在必须检查返回值
-//    while (!ICM20948_Init(&hi2c1)) {
-//        printf("ICM20948 init failed, retrying...\r\n");
-//        HAL_Delay(200);   //失败就等一下再试，不要疯狂重试占满CPU
-//    }
-//  for(;;)
-//  {
-//// ==========================================
-//		// 打印姿态角到上位机，并且使用三维立方体和曲线图进行查看
-//// ==========================================
-//		 // 1. 读传感器
-//        //【修复】原来不管读成不成功都直接往下用imu的数据，现在读失败就跳过这一次，
-//        //不拿垃圾/陈旧数据去更新姿态，等下一个10ms周期再试
-//        if (ICM20948_Update(&imu, &hi2c1)) {
-//            // 2. 姿态解算（四元数 + Mahony）
-//            Quaternation_Update(imu.gyro.x, imu.gyro.y, imu.gyro.z,
-//                          imu.accel.x, imu.accel.y, imu.accel.z,
-//                         dt, &attitude);
-//            // 3. 转欧拉角
-//            Quaternion_ToEuler(&attitude, &roll, &pitch, &yaw);
-//            // ===========================
-//            // 4. 关键：发给 VOFA+
-//            // ===========================
-//            printf("%.3f,%.3f,%.3f\r\n", roll, pitch, yaw);//滚转X，俯仰Y，偏航Z
-//        } else {
-//            printf("IMU read failed, skip this cycle\r\n");
-//        }
-//        vTaskDelay(pdMS_TO_TICKS(10));
-//  }
-//  /* USER CODE END StartDefaultTask */
-//}
-//	}
 /* Private application code --------------------------------------------------*/
 /* USER CODE BEGIN Application */
 //#if ( 1 == userconfig_RTOS_DEBUG )

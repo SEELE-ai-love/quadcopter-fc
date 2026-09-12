@@ -36,3 +36,4 @@ void Quaternation_Update(float gx, float gy, float gz,
 void Quaternion_ToEuler(const Quaternion_t *q, float *roll, float *pitch, float *yaw);
 
 #endif
+													

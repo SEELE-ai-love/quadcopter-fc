@@ -34,4 +34,4 @@ f405-_flightcontrol\i2c.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_pwr
 f405-_flightcontrol\i2c.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_tim.h
 f405-_flightcontrol\i2c.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_tim_ex.h
 f405-_flightcontrol\i2c.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_uart.h
-f405-_flightcontrol\i2c.o: ..\F570_BSP\Inc\Bsp_iic.h
+f405-_flightcontrol\i2c.o: ../F570_BSP/Inc/Bsp_iic.h

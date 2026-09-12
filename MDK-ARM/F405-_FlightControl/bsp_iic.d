@@ -1,5 +1,5 @@
 f405-_flightcontrol\bsp_iic.o: ..\F570_BSP\Bsp_iic.c
-f405-_flightcontrol\bsp_iic.o: ..\F570_BSP\Inc\Bsp_iic.h
+f405-_flightcontrol\bsp_iic.o: ../F570_BSP/Inc/Bsp_iic.h
 f405-_flightcontrol\bsp_iic.o: ../Core/Inc/i2c.h
 f405-_flightcontrol\bsp_iic.o: ../Core/Inc/main.h
 f405-_flightcontrol\bsp_iic.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal.h

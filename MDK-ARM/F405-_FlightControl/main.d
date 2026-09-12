@@ -44,6 +44,7 @@ f405-_flightcontrol\main.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/m
 f405-_flightcontrol\main.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/task.h
 f405-_flightcontrol\main.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/list.h
 f405-_flightcontrol\main.o: ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2/cmsis_os2.h
+f405-_flightcontrol\main.o: ../Core/Inc/dma.h
 f405-_flightcontrol\main.o: ../Core/Inc/i2c.h
 f405-_flightcontrol\main.o: ../Core/Inc/tim.h
 f405-_flightcontrol\main.o: ../Core/Inc/usart.h

@@ -1,9 +1,22 @@
-#ifndef __TASK_H
-#define __TASK_H
+#ifndef __ATTITUDE_TASK_H
+#define __ATTITUDE_TASK_H
 
-#include "Bsp_imu.h"
-void Attitude_GetLatest(float *roll,float *pitch,float *yaw);
-void attitude_task(void*param);
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+/* ?? 【补充】attitude_task.c 里用到这个宏，但原来没定义，编译会报错 */
 #define ATTITUDE_TASK_FREQ  200
 
+/* ?? 任务入口 */
+void attitude_task(void *param);
+
+/* ?? 获取当前最新姿态角 */
+/* ?? 跨任务接口：带临界区保护 */
+void Attitude_GetLatest(float *roll, float *pitch, float *yaw);
+
+#ifdef __cplusplus
+}
 #endif
+
+#endif /* __ATTITUDE_TASK_H */

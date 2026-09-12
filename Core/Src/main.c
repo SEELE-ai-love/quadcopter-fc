@@ -19,6 +19,7 @@
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
 #include "cmsis_os.h"
+#include "dma.h"
 #include "i2c.h"
 #include "tim.h"
 #include "usart.h"
@@ -95,15 +96,17 @@ int main(void)
 
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
+  MX_DMA_Init();
   MX_USART1_UART_Init();
   MX_UART4_Init();
   MX_TIM6_Init();
   MX_I2C1_Init();
+  MX_TIM8_Init();
   /* USER CODE BEGIN 2 */
 HAL_UART_Receive_IT(&huart1,&uart1_recv,1);
 HAL_UART_Receive_IT(&huart4,&uart4_recv,1);
 
-//¼ì²âIICÊÇ·ñ³É¹¦½ÓÊÕ
+//ï¿½ï¿½ï¿½IICï¿½Ç·ï¿½É¹ï¿½ï¿½ï¿½ï¿½ï¿½
 //uint8_t iic_recv=0xff;
 //HAL_I2C_Mem_Read(&hi2c1,0x68<<1,0x00,I2C_MEMADD_SIZE_8BIT,&iic_recv,1,500);
 //printf("0x%2X\r\n",iic_recv);
@@ -123,7 +126,7 @@ HAL_UART_Receive_IT(&huart4,&uart4_recv,1);
   while (1)
   {
     /* USER CODE END WHILE */
-		
+
     /* USER CODE BEGIN 3 */
   }
   /* USER CODE END 3 */
