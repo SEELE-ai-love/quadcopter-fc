@@ -23,6 +23,9 @@ f405-_flightcontrol\main.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_ex
 f405-_flightcontrol\main.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_dma.h
 f405-_flightcontrol\main.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_dma_ex.h
 f405-_flightcontrol\main.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_cortex.h
+f405-_flightcontrol\main.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_adc.h
+f405-_flightcontrol\main.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_ll_adc.h
+f405-_flightcontrol\main.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_adc_ex.h
 f405-_flightcontrol\main.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_flash.h
 f405-_flightcontrol\main.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_flash_ex.h
 f405-_flightcontrol\main.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_flash_ramfunc.h
@@ -44,9 +47,11 @@ f405-_flightcontrol\main.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/m
 f405-_flightcontrol\main.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/task.h
 f405-_flightcontrol\main.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/list.h
 f405-_flightcontrol\main.o: ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2/cmsis_os2.h
+f405-_flightcontrol\main.o: ../Core/Inc/adc.h
 f405-_flightcontrol\main.o: ../Core/Inc/dma.h
 f405-_flightcontrol\main.o: ../Core/Inc/i2c.h
 f405-_flightcontrol\main.o: ../Core/Inc/tim.h
 f405-_flightcontrol\main.o: ../Core/Inc/usart.h
 f405-_flightcontrol\main.o: ../Core/Inc/gpio.h
 f405-_flightcontrol\main.o: D:\Keil_v5\ARM\ARMCC\Bin\..\include\stdio.h
+f405-_flightcontrol\main.o: ../F570_BSP/Inc/Bsp_stp23L.h

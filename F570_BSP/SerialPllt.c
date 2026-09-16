@@ -1,21 +1,21 @@
 #include "SerialPlot.h"
 
 // =============================================
-// JustFloat Ğ­ÒéÊµÏÖ£¨¶ş½øÖÆ£¬¸ßĞ§£©[reference:6]
+// JustFloat åè®®å®ç°ï¼ˆäºŒè¿›åˆ¶ï¼Œé«˜æ•ˆï¼‰[reference:6]
 // =============================================
 #ifdef VOFA_PROTOCOL_JUSTFLOAT
 
-// ÓÃÓÚ´ò°üÊı¾İµÄÁªºÏÌå£¬·½±ã½«float²ğ½âÎª×Ö½Ú[reference:7]
+// ç”¨äºæ‰“åŒ…æ•°æ®çš„è”åˆä½“ï¼Œæ–¹ä¾¿å°†floatæ‹†è§£ä¸ºå­—èŠ‚[reference:7]
 typedef union {
     float f_data;
     uint32_t u_data;
 } Vofa_Type;
 
-// ·¢ËÍ»º³åÇø
+// å‘é€ç¼“å†²åŒº
 static uint8_t tx_frame[VOFA_FRAME_LEN];
 
 /**
- * @brief ½«¸¡µãÊı²ğ·ÖÎª4¸ö×Ö½Ú (Ğ¡¶ËÄ£Ê½) [reference:8]
+ * @brief å°†æµ®ç‚¹æ•°æ‹†åˆ†ä¸º4ä¸ªå­—èŠ‚ (å°ç«¯æ¨¡å¼) [reference:8]
  */
 static void float_to_bytes(float value, uint8_t *bytes) {
     Vofa_Type v;
@@ -27,24 +27,24 @@ static void float_to_bytes(float value, uint8_t *bytes) {
 }
 
 /**
- * @brief ·¢ËÍÈı¸ö¸¡µãÊıµ½ VOFA+ (JustFloatĞ­Òé) [reference:9]
+ * @brief å‘é€ä¸‰ä¸ªæµ®ç‚¹æ•°åˆ° VOFA+ (JustFloatåè®®) [reference:9]
  */
 void Vofa_Send(float data1, float data2, float data3) {
     uint16_t idx = 0;
 
-    // 1. ½«Èı¸öfloat°´Ë³ĞòÌîÈë»º³åÇø
+    // 1. å°†ä¸‰ä¸ªfloatæŒ‰é¡ºåºå¡«å…¥ç¼“å†²åŒº
     float_to_bytes(data1, &tx_frame[idx]); idx += 4;
     float_to_bytes(data2, &tx_frame[idx]); idx += 4;
     float_to_bytes(data3, &tx_frame[idx]); idx += 4;
 
-    // 2. ¸½¼Ó JustFloat ¹Ì¶¨Ö¡Î² [reference:10]
+    // 2. é™„åŠ  JustFloat å›ºå®šå¸§å°¾ [reference:10]
     tx_frame[idx++] = VOFA_TAIL0;
     tx_frame[idx++] = VOFA_TAIL1;
     tx_frame[idx++] = VOFA_TAIL2;
     tx_frame[idx++] = VOFA_TAIL3;
 
-    // 3. Í¨¹ı´®¿Ú·¢ËÍ (Ê¹ÓÃ×èÈû»òDMA·½Ê½)
-    //    ÍÆ¼öÊ¹ÓÃDMA·¢ËÍÒÔÌá¸ßĞ§ÂÊ[reference:11]
+    // 3. é€šè¿‡ä¸²å£å‘é€ (ä½¿ç”¨é˜»å¡æˆ–DMAæ–¹å¼)
+    //    æ¨èä½¿ç”¨DMAå‘é€ä»¥æé«˜æ•ˆç‡[reference:11]
     HAL_UART_Transmit(&huart1, tx_frame, VOFA_FRAME_LEN, 100);
     // HAL_UART_Transmit_DMA(&huart1, tx_frame, VOFA_FRAME_LEN);
 }
@@ -52,15 +52,15 @@ void Vofa_Send(float data1, float data2, float data3) {
 #endif
 
 // =============================================
-// FireWater Ğ­ÒéÊµÏÖ£¨ÎÄ±¾£¬Ò×¶Á£©[reference:12]
+// FireWater åè®®å®ç°ï¼ˆæ–‡æœ¬ï¼Œæ˜“è¯»ï¼‰[reference:12]
 // =============================================
 #ifdef VOFA_PROTOCOL_FIREWATER
 
 #include <stdio.h> // for sprintf
 
 /**
- * @brief ·¢ËÍÈı¸ö¸¡µãÊıµ½ VOFA+ (FireWaterĞ­Òé)
- *        ¸ñÊ½: "value1,value2,value3\n" [reference:13]
+ * @brief å‘é€ä¸‰ä¸ªæµ®ç‚¹æ•°åˆ° VOFA+ (FireWateråè®®)
+ *        æ ¼å¼: "value1,value2,value3\n" [reference:13]
  */
 void Vofa_Send(float data1, float data2, float data3) {
     char buffer[64];
@@ -71,9 +71,9 @@ void Vofa_Send(float data1, float data2, float data3) {
 #endif
 
 // =============================================
-// ³õÊ¼»¯ (ÈôĞèÒª)
+// åˆå§‹åŒ– (è‹¥éœ€è¦)
 // =============================================
 void Vofa_Init(void) {
-    // Èç¹ûÊ¹ÓÃDMA·¢ËÍ£¬¿ÉÒÔÔÚÕâÀï×öÒ»Ğ©³õÊ¼»¯
-    // Ä¿Ç°Áô¿Õ
+    // å¦‚æœä½¿ç”¨DMAå‘é€ï¼Œå¯ä»¥åœ¨è¿™é‡Œåšä¸€äº›åˆå§‹åŒ–
+    // ç›®å‰ç•™ç©º
 }

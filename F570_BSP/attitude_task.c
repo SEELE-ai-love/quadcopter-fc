@@ -1,80 +1,96 @@
 // ============================================================
-//ÓÉµ¥ÈÎÎññîºÏ½âñî³É¶àÈÎÎñ+Free RTOSĞÎÊ½£¬¸ü¾ß¹¤³Ì»¯ÓëÊ±Ğ§ĞÔ
+//ç”±å•ä»»åŠ¡è€¦åˆè§£è€¦æˆå¤šä»»åŠ¡+Free RTOSå½¢å¼ï¼Œæ›´å…·å·¥ç¨‹åŒ–ä¸æ—¶æ•ˆæ€§
 // ============================================================
 #include "attitude_task.h"
 #include "FreeRTOS.h"
+#include "semphr.h"
 #include "task.h"
 #include <stdio.h>
 #include "Bsp_imu.h"
 #include "Bsp_iic.h"
 #include "icm20948_reg.h"
 
-/* ?? ¹²Ïí×ËÌ¬Êı¾İ£¨Ö»ÔÚ±¾ÎÄ¼ş¿É¼û£© */
+/* ?? å…±äº«å§¿æ€æ•°æ®ï¼ˆåªåœ¨æœ¬æ–‡ä»¶å¯è§ï¼‰ */
 static float g_latest_roll  = 0.0f;
 static float g_latest_pitch = 0.0f;
 static float g_latest_yaw   = 0.0f;
 
-/* ?? ?? ¿çÈÎÎñ½Ó¿Ú£º¼ÓÁÙ½çÇø£¬·ÀÖ¹¶Áµ½°ëĞÂ°ë¾ÉµÄÊı¾İ */
+//========== äº’æ–¥é” ==========//
+extern SemaphoreHandle_t g_xMutex_Printf;  
+
+/*è·¨ä»»åŠ¡æ¥å£ï¼šåŠ ä¸´ç•ŒåŒºï¼Œé˜²æ­¢è¯»åˆ°åŠæ–°åŠæ—§çš„æ•°æ® */
 void Attitude_GetLatest(float *roll, float *pitch, float *yaw)
 {
-	  /* ½øÈëÁÙ½çÇø£¬¹Ø±ÕÖĞ¶Ï */
+	  /* è¿›å…¥ä¸´ç•ŒåŒºï¼Œå…³é—­ä¸­æ–­ */
     taskENTER_CRITICAL();
 	
     *roll  = g_latest_roll;
     *pitch = g_latest_pitch;
     *yaw   = g_latest_yaw;
 	
-	 /* ÍÆ³öÁÙ½çÇø£¬¿ªÆôÖĞ¶Ï */
+	 /* é€€å‡ºä¸´ç•ŒåŒºï¼Œå¼€å¯ä¸­æ–­ */
     taskEXIT_CRITICAL();
 }
 
-/* ?? ×ËÌ¬ÈÎÎñ */
+/* ?? å§¿æ€ä»»åŠ¡ */
 void attitude_task(void *param)
 {
     IMU_DATA_T imu = {0};
     float roll = 0.0f, pitch = 0.0f, yaw = 0.0f;
 		
-    TickType_t preTime;//pretime×÷ÎªRTOSÀïÃæ×¨ÃÅ¼ÇÂ¼Ê±¼ä´ÁµÄ±äÁ¿
+    TickType_t preTime;//pretimeä½œä¸ºRTOSé‡Œé¢ä¸“é—¨è®°å½•æ—¶é—´æˆ³çš„å˜é‡
     (void)param;
-    preTime = xTaskGetTickCount();//»ñÈ¡µ±Ç°ÏµÍ³TickÊı
+    preTime = xTaskGetTickCount();//è·å–å½“å‰ç³»ç»ŸTickæ•°
 
-    /* ?? ³õÊ¼»¯Ê§°Ü¾ÍÖØÊÔ£¬±ÜÃâ´ø×Å´íÎó×´Ì¬¼ÌĞøÅÜ */
+    /* ?? åˆå§‹åŒ–å¤±è´¥å°±é‡è¯•ï¼Œé¿å…å¸¦ç€é”™è¯¯çŠ¶æ€ç»§ç»­è·‘ */
     while (!ICM20948_Init(&hi2c1)) {
-        printf("ICM20948 init failed, retrying...\r\n");
+             if(xSemaphoreTake(g_xMutex_Printf, portMAX_DELAY) == pdTRUE)
+        {
+            printf("ICM20948 init failed, retrying...\r\n");
+            xSemaphoreGive(g_xMutex_Printf);
+        }
         vTaskDelay(pdMS_TO_TICKS(200));
     }
-    printf("ICM20948 init success\r\n");
-
+      // ========== äº’æ–¥é”ä¿æŠ¤ printf ==========
+    if(xSemaphoreTake(g_xMutex_Printf, portMAX_DELAY) == pdTRUE)
+    {
+        printf("ICM20948 init success\r\n");
+        xSemaphoreGive(g_xMutex_Printf);
+    }
     for (;;)
     {
         float dt = 1.0f / (float)ATTITUDE_TASK_FREQ;
 
         if (ICM20948_Update(&imu, &hi2c1))
         {
-            /*  ×ËÌ¬½âËã£ºËÄÔªÊı + Mahony */
+            /*  å§¿æ€è§£ç®—ï¼šå››å…ƒæ•° + Mahony */
             Quaternation_Update(imu.gyro.x, imu.gyro.y, imu.gyro.z,
                                  imu.accel.x, imu.accel.y, imu.accel.z,
                                  dt, &attitude);
             Quaternion_ToEuler(&attitude, &roll, &pitch, &yaw);
 
-            /* ½øÈëÁÙ½çÇø£¬¹Ø±ÕÖĞ¶Ï */
+            /* è¿›å…¥ä¸´ç•ŒåŒºï¼Œå…³é—­ä¸­æ–­ */
             taskENTER_CRITICAL();
 					
             g_latest_roll  = roll;
             g_latest_pitch = pitch;
             g_latest_yaw   = yaw;
 					
-					  /* ÍÆ³öÁÙ½çÇø£¬¿ªÆôÖĞ¶Ï */
+					  /* æ¨å‡ºä¸´ç•ŒåŒºï¼Œå¼€å¯ä¸­æ–­ */
             taskEXIT_CRITICAL();
-            printf("%.2f,%.2f,%.2f\r\n", roll, pitch, yaw);
+            if(xSemaphoreTake(g_xMutex_Printf, portMAX_DELAY) == pdTRUE)
+            {
+                //printf("%.2f,%.2f,%.2f\r\n", roll, pitch, yaw);
+                xSemaphoreGive(g_xMutex_Printf);
+            }
         }
         else
         {
-            printf("IMU read failed, skip this cycle\r\n");
+            //printf("IMU read failed, skip this cycle\r\n");
         }
 
-        /* ¹Ì¶¨200HzÖÜÆÚ */
-				/*¼ÓÈëpreTimrÖ®ºó£¬µÈµ½ÉÏÒ»ÅÄ½áÊøÖ®ºó£¬ÔÚ¿ªÊ¼5msÑÓÊ±*/
+        /* å›ºå®š200Hzå‘¨æœŸ */
+				/*åŠ å…¥preTimrä¹‹åï¼Œç­‰åˆ°ä¸Šä¸€æ‹ç»“æŸä¹‹åï¼Œåœ¨å¼€å§‹5mså»¶æ—¶*/
         vTaskDelayUntil(&preTime, pdMS_TO_TICKS(1000.0f / ATTITUDE_TASK_FREQ));
     }
 }

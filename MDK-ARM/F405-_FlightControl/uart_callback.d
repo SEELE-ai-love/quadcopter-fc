@@ -24,6 +24,9 @@ f405-_flightcontrol\uart_callback.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4
 f405-_flightcontrol\uart_callback.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_dma.h
 f405-_flightcontrol\uart_callback.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_dma_ex.h
 f405-_flightcontrol\uart_callback.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_cortex.h
+f405-_flightcontrol\uart_callback.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_adc.h
+f405-_flightcontrol\uart_callback.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_ll_adc.h
+f405-_flightcontrol\uart_callback.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_adc_ex.h
 f405-_flightcontrol\uart_callback.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_flash.h
 f405-_flightcontrol\uart_callback.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_flash_ex.h
 f405-_flightcontrol\uart_callback.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_flash_ramfunc.h
@@ -41,3 +44,9 @@ f405-_flightcontrol\uart_callback.o: ../Middlewares/Third_Party/FreeRTOS/Source/
 f405-_flightcontrol\uart_callback.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/deprecated_definitions.h
 f405-_flightcontrol\uart_callback.o: ../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM4F/portmacro.h
 f405-_flightcontrol\uart_callback.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/mpu_wrappers.h
+f405-_flightcontrol\uart_callback.o: ../Core/Inc/tim.h
+f405-_flightcontrol\uart_callback.o: ../F570_BSP/Inc/Bsp_stp23L.h
+f405-_flightcontrol\uart_callback.o: D:\Keil_v5\ARM\ARMCC\Bin\..\include\stdio.h
+f405-_flightcontrol\uart_callback.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/queue.h
+f405-_flightcontrol\uart_callback.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/task.h
+f405-_flightcontrol\uart_callback.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/list.h

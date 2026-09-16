@@ -43,7 +43,7 @@ void control_task(void*param)
 		else
 		{
 			//电机转动
-//			m1.throttle=120;
+//	    m1.throttle=120;
 //		  m2.throttle=120;
 //			m3.throttle=120;
 //			m4.throttle=120;

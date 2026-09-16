@@ -19,6 +19,7 @@
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
 #include "cmsis_os.h"
+#include "adc.h"
 #include "dma.h"
 #include "i2c.h"
 #include "tim.h"
@@ -28,6 +29,9 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include <stdio.h>
+#include <stdio.h>
+#include "FreeRTOS.h"
+#include "Bsp_stp23L.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -99,9 +103,11 @@ int main(void)
   MX_DMA_Init();
   MX_USART1_UART_Init();
   MX_UART4_Init();
+  MX_UART5_Init();
   MX_TIM6_Init();
-  MX_I2C1_Init();
   MX_TIM8_Init();
+  MX_ADC1_Init();
+  MX_I2C1_Init();
   /* USER CODE BEGIN 2 */
 HAL_UART_Receive_IT(&huart1,&uart1_recv,1);
 HAL_UART_Receive_IT(&huart4,&uart4_recv,1);
@@ -249,3 +255,5 @@ void assert_failed(uint8_t *file, uint32_t line)
   /* USER CODE END 6 */
 }
 #endif /* USE_FULL_ASSERT */
+
+

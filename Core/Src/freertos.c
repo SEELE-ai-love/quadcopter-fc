@@ -20,8 +20,10 @@
 /* Includes ------------------------------------------------------------------*/
 #include "FreeRTOS.h"
 #include "task.h"
+#include "queue.h"
 #include "main.h"
 #include "cmsis_os.h"
+#include "semphr.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
@@ -34,6 +36,9 @@
 #include "attitude_task.h"
 #include "Dshot.h"
 #include "Control_task.h"
+#include "power_task.h"
+#include "Bsp_stp23L.h"
+#include "STP23L_task.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -44,7 +49,7 @@
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
 
-#define userconfig_RTOS_DEBUG  0//是否开启调试任务
+#define userconfig_RTOS_DEBUG  1//是否开启调试任务
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -55,19 +60,22 @@
 /* Private variables ---------------------------------------------------------*/
 /* USER CODE BEGIN Variables */
 /* USER CODE BEGIN 0 */
+
+ QueueHandle_t g_xQueueSTP23L_Ori=NULL;//队列任务句柄
+ SemaphoreHandle_t g_xMutex_Printf = NULL;//printf互斥锁句柄
+ 
+ 
 #include <string.h>
 #include <stdlib.h>
-
-// VOFA+ 可调参数（初始为 0）
 /* USER CODE END 0 */
 /* USER CODE END Variables */
 /* Definitions for defaultTask */
-osThreadId_t defaultTaskHandle;
-const osThreadAttr_t defaultTask_attributes = {
-  .name = "defaultTask",
-  .stack_size = 128 * 4,
-  .priority = (osPriority_t) osPriorityLow,//osPriorityAboveNormal改变优先级了
-};
+//osThreadId_t defaultTaskHandle;
+//const osThreadAttr_t defaultTask_attributes = {
+//  .name = "defaultTask",
+//  .stack_size = 128 * 4,
+//  .priority = (osPriority_t) osPriorityLow,
+//};
 
 /* Private function prototypes -----------------------------------------------*/
 /* USER CODE BEGIN FunctionPrototypes */
@@ -145,9 +153,13 @@ void vApplicationStackOverflowHook(xTaskHandle xTask, signed char *pcTaskName)
    configCHECK_FOR_STACK_OVERFLOW is defined to 1 or 2. This hook function is
    called if a stack overflow is detected. */
 	//检测是否发生栈溢出
-	printf("%s stack overflow\r\n",pcTaskName);
-
+	if(xSemaphoreTake(g_xMutex_Printf, portMAX_DELAY) == pdTRUE)
+	{
+		printf("%s stack overflow\r\n", pcTaskName);
+		xSemaphoreGive(g_xMutex_Printf);
+	}
 }
+
 
 /* USER CODE END 4 */
 
@@ -166,7 +178,11 @@ void vApplicationMallocFailedHook(void)
    provide information on how the remaining heap might be fragmented). */
 	
   //内存分配失败函数
-	 printf("malloc failed.check heapsize\r\n");
+		if(xSemaphoreTake(g_xMutex_Printf, portMAX_DELAY) == pdTRUE)
+	{
+		printf("malloc failed. check heapsize\r\n");
+		xSemaphoreGive(g_xMutex_Printf);
+	}
 }
 
 /* USER CODE END 5 */
@@ -183,6 +199,14 @@ void MX_FREERTOS_Init(void) {
 
   /* USER CODE BEGIN RTOS_MUTEX */
   /* add mutexes, ... */
+	
+	 // ========== 在这里创建 printf 互斥锁 ==========
+  g_xMutex_Printf = xSemaphoreCreateMutex();
+  if(g_xMutex_Printf == NULL)
+  {
+    // 互斥锁创建失败，这里可以加错误处理
+    while(1); // 死循环，方便调试发现问题
+  }
   /* USER CODE END RTOS_MUTEX */
 
   /* USER CODE BEGIN RTOS_SEMAPHORES */
@@ -195,27 +219,31 @@ void MX_FREERTOS_Init(void) {
 
   /* USER CODE BEGIN RTOS_QUEUES */
   /* add queues, ... */
+	//STP23L模块队列任务
   /* USER CODE END RTOS_QUEUES */
-
+  g_xQueueSTP23L_Ori=xQueueCreate(3,sizeof(OriData_STP23L_t));
   /* Create the thread(s) */
   /* creation of defaultTask */
-  defaultTaskHandle = osThreadNew(StartDefaultTask, NULL, &defaultTask_attributes);
-
+	//RTOS初始调试任务
+  //defaultTaskHandle = osThreadNew(StartDefaultTask, NULL, &defaultTask_attributes);
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
 	
 	//创建Free RTOS调试任务
-// #if ( 1 == userconfig_RTOS_DEBUG )
-//	 static uint16_t delaytime = 5000;//打印时间间隔，单位tick
-//	 xTaskCreate(RTOSDebugTask,"DebugTask",128, &delaytime ,osPriorityAboveNormal,NULL);
-// #endif
+ #if ( 1 == userconfig_RTOS_DEBUG )
+	 static uint16_t delaytime = 5000;//打印时间间隔，单位tick
+	 xTaskCreate(RTOSDebugTask,"DebugTask",512, &delaytime ,0,NULL);
+ #endif
 	
 	
   /* USER CODE END RTOS_THREADS */
 
   /* USER CODE BEGIN RTOS_EVENTS */
+	xTaskCreate(StartDefaultTask, "defaultTask", 128, NULL, 0, NULL);
 	xTaskCreate(attitude_task,"Attitude", 512, NULL, 3, NULL);
 	xTaskCreate(control_task,"Control",512,NULL,2,NULL);
+	xTaskCreate(power_task,"Power",512,NULL,1,NULL);
+	xTaskCreate(STP23L_task, "STP23L", 512, NULL, 2, NULL); 
   /* add events, ... */
   /* USER CODE END RTOS_EVENTS */
 
@@ -227,14 +255,13 @@ void MX_FREERTOS_Init(void) {
   * @param  argument: Not used
   * @retval None
   */
-  /* USER CODE BEGIN StartDefaultTask */
+/* USER CODE END Header_StartDefaultTask */
 void StartDefaultTask(void *argument)
 {
-	    for (;;)
-    {
-        vTaskDelay(pdMS_TO_TICKS(1000));
-    }                                                                                 
-    /* USER CODE BEGIN StartDefaultTask */
+	HAL_UARTEx_ReceiveToIdle_DMA(&huart5, DMABuf_oridata_stp23L.Buf,userconfig_STP23L_DMABUF_LEN);
+	for(;;)
+	{
+  /* USER CODE BEGIN StartDefaultTask */
     // 初始化传感器（只做一次）
 //    while (!ICM20948_Init(&hi2c1)) {
 //    }
@@ -242,39 +269,49 @@ void StartDefaultTask(void *argument)
 //    for (;;)
 //    {
 //    }
-	  vTaskDelete(NULL);
+	  //vTaskDelete(NULL);
+		vTaskDelay(pdMS_TO_TICKS(500));
+	}
   /* USER CODE END StartDefaultTask */
 }
 
 /* Private application code --------------------------------------------------*/
 /* USER CODE BEGIN Application */
-//#if ( 1 == userconfig_RTOS_DEBUG )
-//void RTOSDebugTask(void *param)
-//{
-//	uint16_t* delaytime = (uint16_t*)param;
-//	static char showbuf[500];
-//	
-//	while( 1 )
-//	{
-//		//打印CPU占比
-//		vTaskGetRunTimeStats(showbuf);
-//		printf("TaskName\tUseTime\tCPU\r\n");
-//		printf("%s\r\n",showbuf);
-//		vTaskDelay(*delaytime);
+#if ( 1 == userconfig_RTOS_DEBUG )
+void RTOSDebugTask(void *param)
+{
+    uint16_t* delaytime = (uint16_t*)param;
+    static char showbuf[800];
 
-//		//打印剩余任务栈大小,单位word
-//		vTaskList(showbuf);
-//		printf("TaskName\tTaskState\tTaskPrio\tStackSize\tTaskNum\r\n");
-//		printf("%s\r\n",showbuf);
-//		vTaskDelay(*delaytime);
+    while( 1 )
+    {
+        if (xSemaphoreTake(g_xMutex_Printf, portMAX_DELAY) == pdTRUE)
+        {
+            vTaskGetRunTimeStats(showbuf);
+            printf("TaskName\tUseTime\tCPU\r\n");
+            printf("%s\r\n", showbuf);
+            xSemaphoreGive(g_xMutex_Printf);
+        }
+        vTaskDelay(*delaytime);
 
-//		
+        if (xSemaphoreTake(g_xMutex_Printf, portMAX_DELAY) == pdTRUE)
+        {
+            vTaskList(showbuf);
+            printf("TaskName\tTaskState\tTaskPrio\tStackSize\tTaskNum\r\n");
+            printf("%s\r\n", showbuf);
+            xSemaphoreGive(g_xMutex_Printf);
+        }
+        vTaskDelay(*delaytime);
 
-//		//打印剩余的堆区大小,单位bytes
-//		printf("free heap size : %d bytes\r\n\r\n",xPortGetFreeHeapSize());
-//		vTaskDelay(*delaytime);
-//	}
-//}
-//#endif
+        if (xSemaphoreTake(g_xMutex_Printf, portMAX_DELAY) == pdTRUE)
+        {
+            printf("free heap size : %d bytes\r\n\r\n", xPortGetFreeHeapSize());
+            xSemaphoreGive(g_xMutex_Printf);
+        }
+        vTaskDelay(*delaytime);
+    }
+}
+#endif
+
 /* USER CODE END Application */
 

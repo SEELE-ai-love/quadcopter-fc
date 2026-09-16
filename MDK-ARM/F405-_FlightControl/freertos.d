@@ -10,6 +10,7 @@ f405-_flightcontrol\freertos.o: ../Middlewares/Third_Party/FreeRTOS/Source/porta
 f405-_flightcontrol\freertos.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/mpu_wrappers.h
 f405-_flightcontrol\freertos.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/task.h
 f405-_flightcontrol\freertos.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/list.h
+f405-_flightcontrol\freertos.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/queue.h
 f405-_flightcontrol\freertos.o: ../Core/Inc/main.h
 f405-_flightcontrol\freertos.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal.h
 f405-_flightcontrol\freertos.o: ../Core/Inc/stm32f4xx_hal_conf.h
@@ -32,6 +33,9 @@ f405-_flightcontrol\freertos.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_ha
 f405-_flightcontrol\freertos.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_dma.h
 f405-_flightcontrol\freertos.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_dma_ex.h
 f405-_flightcontrol\freertos.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_cortex.h
+f405-_flightcontrol\freertos.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_adc.h
+f405-_flightcontrol\freertos.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_ll_adc.h
+f405-_flightcontrol\freertos.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_adc_ex.h
 f405-_flightcontrol\freertos.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_flash.h
 f405-_flightcontrol\freertos.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_flash_ex.h
 f405-_flightcontrol\freertos.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_flash_ramfunc.h
@@ -44,6 +48,7 @@ f405-_flightcontrol\freertos.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_ha
 f405-_flightcontrol\freertos.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_uart.h
 f405-_flightcontrol\freertos.o: ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2/cmsis_os.h
 f405-_flightcontrol\freertos.o: ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2/cmsis_os2.h
+f405-_flightcontrol\freertos.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/semphr.h
 f405-_flightcontrol\freertos.o: ../Core/Inc/tim.h
 f405-_flightcontrol\freertos.o: D:\Keil_v5\ARM\ARMCC\Bin\..\include\stdio.h
 f405-_flightcontrol\freertos.o: ../F570_BSP/Inc/icm20948_reg.h
@@ -54,5 +59,8 @@ f405-_flightcontrol\freertos.o: D:\Keil_v5\ARM\ARMCC\Bin\..\include\math.h
 f405-_flightcontrol\freertos.o: ../F570_BSP/Inc/attitude_task.h
 f405-_flightcontrol\freertos.o: ../F570_BSP/Inc/Dshot.h
 f405-_flightcontrol\freertos.o: ../F570_BSP/Inc/Control_task.h
+f405-_flightcontrol\freertos.o: ../F570_BSP/Inc/power_task.h
+f405-_flightcontrol\freertos.o: ../F570_BSP/Inc/Bsp_stp23L.h
+f405-_flightcontrol\freertos.o: ../F570_BSP/Inc/STP23L_task.h
 f405-_flightcontrol\freertos.o: D:\Keil_v5\ARM\ARMCC\Bin\..\include\string.h
 f405-_flightcontrol\freertos.o: D:\Keil_v5\ARM\ARMCC\Bin\..\include\stdlib.h

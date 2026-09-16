@@ -1,0 +1,17 @@
+f405-_flightcontrol\stp23l_task.o: ..\F570_BSP\STP23L_task.c
+f405-_flightcontrol\stp23l_task.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/FreeRTOS.h
+f405-_flightcontrol\stp23l_task.o: D:\Keil_v5\ARM\ARMCC\Bin\..\include\stddef.h
+f405-_flightcontrol\stp23l_task.o: D:\Keil_v5\ARM\ARMCC\Bin\..\include\stdint.h
+f405-_flightcontrol\stp23l_task.o: ../Core/Inc/FreeRTOSConfig.h
+f405-_flightcontrol\stp23l_task.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/projdefs.h
+f405-_flightcontrol\stp23l_task.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/portable.h
+f405-_flightcontrol\stp23l_task.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/deprecated_definitions.h
+f405-_flightcontrol\stp23l_task.o: ../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM4F/portmacro.h
+f405-_flightcontrol\stp23l_task.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/mpu_wrappers.h
+f405-_flightcontrol\stp23l_task.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/queue.h
+f405-_flightcontrol\stp23l_task.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/task.h
+f405-_flightcontrol\stp23l_task.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/list.h
+f405-_flightcontrol\stp23l_task.o: D:\Keil_v5\ARM\ARMCC\Bin\..\include\stdio.h
+f405-_flightcontrol\stp23l_task.o: ../F570_BSP/Inc/Bsp_stp23L.h
+f405-_flightcontrol\stp23l_task.o: ../F570_BSP/Inc/STP23L_task.h
+f405-_flightcontrol\stp23l_task.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/semphr.h

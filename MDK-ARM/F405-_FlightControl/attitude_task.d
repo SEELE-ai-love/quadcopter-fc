@@ -9,6 +9,8 @@ f405-_flightcontrol\attitude_task.o: ../Middlewares/Third_Party/FreeRTOS/Source/
 f405-_flightcontrol\attitude_task.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/deprecated_definitions.h
 f405-_flightcontrol\attitude_task.o: ../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM4F/portmacro.h
 f405-_flightcontrol\attitude_task.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/mpu_wrappers.h
+f405-_flightcontrol\attitude_task.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/semphr.h
+f405-_flightcontrol\attitude_task.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/queue.h
 f405-_flightcontrol\attitude_task.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/task.h
 f405-_flightcontrol\attitude_task.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/list.h
 f405-_flightcontrol\attitude_task.o: D:\Keil_v5\ARM\ARMCC\Bin\..\include\stdio.h
@@ -36,6 +38,9 @@ f405-_flightcontrol\attitude_task.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4
 f405-_flightcontrol\attitude_task.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_dma.h
 f405-_flightcontrol\attitude_task.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_dma_ex.h
 f405-_flightcontrol\attitude_task.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_cortex.h
+f405-_flightcontrol\attitude_task.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_adc.h
+f405-_flightcontrol\attitude_task.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_ll_adc.h
+f405-_flightcontrol\attitude_task.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_adc_ex.h
 f405-_flightcontrol\attitude_task.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_flash.h
 f405-_flightcontrol\attitude_task.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_flash_ex.h
 f405-_flightcontrol\attitude_task.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_flash_ramfunc.h

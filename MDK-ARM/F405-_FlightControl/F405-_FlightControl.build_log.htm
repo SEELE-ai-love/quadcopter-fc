@@ -22,14 +22,20 @@ Dialog DLL:      TCM.DLL V1.34.0.0
  
 <h2>Project:</h2>
 D:\F405-_FlightControl\F405-_FlightControl\MDK-ARM\F405-_FlightControl.uvprojx
-Project File Date:  09/11/2026
+Project File Date:  09/16/2026
 
 <h2>Output:</h2>
 *** Using Compiler 'V5.06 update 6 (build 750)', folder: 'D:\Keil_v5\ARM\ARMCC\Bin'
 Build target 'F405-_FlightControl'
-After Build - User command #1: fromelf --bin --output=..\F405.bin .\F405-_FlightControl\F405-_FlightControl.axf
-*** Error: CreateProcess failed, Command: 'fromelf --bin --output=..\F405.bin .\F405-_FlightControl\F405-_FlightControl.axf'
-"F405-_FlightControl\F405-_FlightControl.axf" - 1 Error(s), 0 Warning(s).
+compiling attitude_task.c...
+../F570_BSP/Inc/Bsp_imu.h(39): warning:  #1-D: last line of file ends without a newline
+  													
+..\F570_BSP\attitude_task.c: 1 warning, 0 errors
+linking...
+Program Size: Code=39156 RO-data=456 RW-data=308 ZI-data=58772  
+FromELF: creating hex file...
+After Build - User command #1: D:\Keil_v5\ARM\ARMCC\bin\fromelf.exe --bin --output=..\F405.bin .\F405-_FlightControl\F405-_FlightControl.axf
+"F405-_FlightControl\F405-_FlightControl.axf" - 0 Error(s), 1 Warning(s).
 
 <h2>Software Packages used:</h2>
 
@@ -52,8 +58,7 @@ Package Vendor: Keil
 <h2>Collection of Component Files used:</h2>
 
    * Component: ARM::CMSIS:CORE:5.3.0
-Target not created.
-Build Time Elapsed:  00:00:01
+Build Time Elapsed:  00:00:03
 </pre>
 </body>
 </html>

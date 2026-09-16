@@ -6,20 +6,20 @@
 #include <string.h>
 
 // =============================================
-// Ğ­ÒéÑ¡Ôñ£ºÖ»Ğè¶¨ÒåÆäÖĞÒ»¸ö
+// åè®®é€‰æ‹©ï¼šåªéœ€å®šä¹‰å…¶ä¸­ä¸€ä¸ª
 // =============================================
-#define VOFA_PROTOCOL_JUSTFLOAT  1   // ¶ş½øÖÆĞ­Òé£¬¸ßĞ§
-//#define VOFA_PROTOCOL_FIREWATER  1  // ÎÄ±¾Ğ­Òé£¬Ò×¶Á
+#define VOFA_PROTOCOL_JUSTFLOAT  1   // äºŒè¿›åˆ¶åè®®ï¼Œé«˜æ•ˆ
+//#define VOFA_PROTOCOL_FIREWATER  1  // æ–‡æœ¬åè®®ï¼Œæ˜“è¯»
 
 // =============================================
-// JustFloat Ğ­ÒéÅäÖÃ
+// JustFloat åè®®é…ç½®
 // =============================================
 #ifdef VOFA_PROTOCOL_JUSTFLOAT
-    #define VOFA_CH_NUM     3       // Í¨µÀÊı (ÀıÈç: roll, pitch, yaw)
-    #define VOFA_TAIL_LEN   4       // Ö¡Î²³¤¶È
-    #define VOFA_FRAME_LEN  (VOFA_CH_NUM * 4 + VOFA_TAIL_LEN) // ×ÜÖ¡³¤
+    #define VOFA_CH_NUM     3       // é€šé“æ•° (ä¾‹å¦‚: roll, pitch, yaw)
+    #define VOFA_TAIL_LEN   4       // å¸§å°¾é•¿åº¦
+    #define VOFA_FRAME_LEN  (VOFA_CH_NUM * 4 + VOFA_TAIL_LEN) // æ€»å¸§é•¿
 
-    // JustFloat ¹Ì¶¨Ö¡Î²: 0x00, 0x00, 0x80, 0x7F [reference:4][reference:5]
+    // JustFloat å›ºå®šå¸§å°¾: 0x00, 0x00, 0x80, 0x7F [reference:4][reference:5]
     #define VOFA_TAIL0      0x00
     #define VOFA_TAIL1      0x00
     #define VOFA_TAIL2      0x80
@@ -27,9 +27,9 @@
 #endif
 
 // =============================================
-// API º¯Êı
+// API å‡½æ•°
 // =============================================
-void Vofa_Init(void);                              // ³õÊ¼»¯£¨ÈçDMA»òÖĞ¶Ï£©
-void Vofa_Send(float data1, float data2, float data3); // ·¢ËÍÈı¸ö¸¡µãÊı
+void Vofa_Init(void);                              // åˆå§‹åŒ–ï¼ˆå¦‚DMAæˆ–ä¸­æ–­ï¼‰
+void Vofa_Send(float data1, float data2, float data3); // å‘é€ä¸‰ä¸ªæµ®ç‚¹æ•°
 
 #endif
