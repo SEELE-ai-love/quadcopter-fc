@@ -26,7 +26,7 @@ typedef struct
     short   throttle;
 } dshotMotorVal_t;
 
-/* ?? 驱动接口（函数指针结构体） */
+/*  驱动接口（函数指针结构体） */
 typedef struct
 {
     void (*init)(void);

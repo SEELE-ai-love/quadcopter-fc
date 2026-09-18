@@ -27,7 +27,7 @@ void STP23L_task(void *param)
 		}
 		if(xSemaphoreTake(g_xMutex_Printf, portMAX_DELAY) == pdTRUE)
     {
-		printf("%.3f\r\n",g_readonly_distance);
+		//printf("%.3f\r\n",g_readonly_distance);
 		xSemaphoreGive(g_xMutex_Printf); 
     }
 	}

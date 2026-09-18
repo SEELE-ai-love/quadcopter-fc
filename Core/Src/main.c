@@ -24,6 +24,7 @@
 #include "i2c.h"
 #include "tim.h"
 #include "usart.h"
+#include "usb_host.h"
 #include "gpio.h"
 
 /* Private includes ----------------------------------------------------------*/
@@ -193,6 +194,7 @@ int fputc(int ch,FILE* stream)
 	while( HAL_OK != HAL_UART_Transmit(DebugSerial,(const uint8_t *)&ch,1,100));
 	return ch;
 }
+
 /**
   * @brief  The application entry point.
   * @retval int
@@ -231,14 +233,14 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
   */
 void Error_Handler(void)
 {
-  /* USER CODE BEGIN Error_Handler_Debug */
-  /* User can add his own implementation to report the HAL error return state */
+  //printf("ERROR_HANDLER TRIGGERED!\r\n");   // USB失败返回打印，但是这里不推荐这个，因为printf重定向里面包含while循环，如果huart出错，错误返回函数本身就无意义，进入无限循环
   __disable_irq();
   while (1)
   {
   }
-  /* USER CODE END Error_Handler_Debug */
 }
+//  /* USER CODE END Error_Handler_Debug */
+//}
 #ifdef USE_FULL_ASSERT
 /**
   * @brief  Reports the name of the source file and the source line number
@@ -255,5 +257,3 @@ void assert_failed(uint8_t *file, uint32_t line)
   /* USER CODE END 6 */
 }
 #endif /* USE_FULL_ASSERT */
-
-

@@ -37,6 +37,8 @@ f405-_flightcontrol\uart_callback.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4
 f405-_flightcontrol\uart_callback.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_tim.h
 f405-_flightcontrol\uart_callback.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_tim_ex.h
 f405-_flightcontrol\uart_callback.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_uart.h
+f405-_flightcontrol\uart_callback.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_hcd.h
+f405-_flightcontrol\uart_callback.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_ll_usb.h
 f405-_flightcontrol\uart_callback.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/FreeRTOS.h
 f405-_flightcontrol\uart_callback.o: ../Core/Inc/FreeRTOSConfig.h
 f405-_flightcontrol\uart_callback.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/projdefs.h

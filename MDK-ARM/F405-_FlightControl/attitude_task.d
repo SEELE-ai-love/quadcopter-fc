@@ -51,5 +51,7 @@ f405-_flightcontrol\attitude_task.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4
 f405-_flightcontrol\attitude_task.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_tim.h
 f405-_flightcontrol\attitude_task.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_tim_ex.h
 f405-_flightcontrol\attitude_task.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_uart.h
+f405-_flightcontrol\attitude_task.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_hcd.h
+f405-_flightcontrol\attitude_task.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_ll_usb.h
 f405-_flightcontrol\attitude_task.o: ../F570_BSP/Inc/Bsp_iic.h
 f405-_flightcontrol\attitude_task.o: ../F570_BSP/Inc/icm20948_reg.h

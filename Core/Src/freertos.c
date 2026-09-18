@@ -19,12 +19,12 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include "FreeRTOS.h"
-#include "task.h"
 #include "queue.h"
+#include "task.h"
 #include "main.h"
 #include "cmsis_os.h"
 #include "semphr.h"
-
+#include "usbh_core.h"
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "tim.h"
@@ -39,6 +39,7 @@
 #include "power_task.h"
 #include "Bsp_stp23L.h"
 #include "STP23L_task.h"
+#include "usb_host.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -49,7 +50,7 @@
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
 
-#define userconfig_RTOS_DEBUG  1//是否开启调试任务
+#define userconfig_RTOS_DEBUG  0//是否开启调试任务
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -74,7 +75,7 @@
 //const osThreadAttr_t defaultTask_attributes = {
 //  .name = "defaultTask",
 //  .stack_size = 128 * 4,
-//  .priority = (osPriority_t) osPriorityLow,
+//  .priority = (osPriority_t)1,
 //};
 
 /* Private function prototypes -----------------------------------------------*/
@@ -88,6 +89,7 @@ void RTOSDebugTask(void *param);
 
 void StartDefaultTask(void *argument);
 
+extern void MX_USB_HOST_Init(void);
 void MX_FREERTOS_Init(void); /* (MISRA C 2004 rule 8.1) */
 
 /* Hook prototypes */
@@ -141,6 +143,7 @@ void vApplicationIdleHook( void )
    function, because it is the responsibility of the idle task to clean up
    memory allocated by the kernel to any task that has since been deleted. */
     //任务回调函数
+	
 }
 
 /* USER CODE END 2 */
@@ -156,7 +159,7 @@ void vApplicationStackOverflowHook(xTaskHandle xTask, signed char *pcTaskName)
 	if(xSemaphoreTake(g_xMutex_Printf, portMAX_DELAY) == pdTRUE)
 	{
 		printf("%s stack overflow\r\n", pcTaskName);
-		xSemaphoreGive(g_xMutex_Printf);
+				xSemaphoreGive(g_xMutex_Printf);
 	}
 }
 
@@ -181,7 +184,7 @@ void vApplicationMallocFailedHook(void)
 		if(xSemaphoreTake(g_xMutex_Printf, portMAX_DELAY) == pdTRUE)
 	{
 		printf("malloc failed. check heapsize\r\n");
-		xSemaphoreGive(g_xMutex_Printf);
+			xSemaphoreGive(g_xMutex_Printf);
 	}
 }
 
@@ -220,26 +223,27 @@ void MX_FREERTOS_Init(void) {
   /* USER CODE BEGIN RTOS_QUEUES */
   /* add queues, ... */
 	//STP23L模块队列任务
+	g_xQueueSTP23L_Ori = xQueueCreate(3, sizeof(OriData_STP23L_t));
   /* USER CODE END RTOS_QUEUES */
-  g_xQueueSTP23L_Ori=xQueueCreate(3,sizeof(OriData_STP23L_t));
+
   /* Create the thread(s) */
   /* creation of defaultTask */
-	//RTOS初始调试任务
   //defaultTaskHandle = osThreadNew(StartDefaultTask, NULL, &defaultTask_attributes);
+
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
 	
 	//创建Free RTOS调试任务
- #if ( 1 == userconfig_RTOS_DEBUG )
-	 static uint16_t delaytime = 5000;//打印时间间隔，单位tick
-	 xTaskCreate(RTOSDebugTask,"DebugTask",512, &delaytime ,0,NULL);
- #endif
+// #if ( 1 == userconfig_RTOS_DEBUG )
+//	 static uint16_t delaytime = 5000;//打印时间间隔，单位tick
+//	 xTaskCreate(RTOSDebugTask,"DebugTask",512, &delaytime ,0,NULL);
+// #endif
 	
 	
   /* USER CODE END RTOS_THREADS */
 
   /* USER CODE BEGIN RTOS_EVENTS */
-	xTaskCreate(StartDefaultTask, "defaultTask", 128, NULL, 0, NULL);
+	xTaskCreate(StartDefaultTask, "defaultTask", 512, NULL, 1, NULL);
 	xTaskCreate(attitude_task,"Attitude", 512, NULL, 3, NULL);
 	xTaskCreate(control_task,"Control",512,NULL,2,NULL);
 	xTaskCreate(power_task,"Power",512,NULL,1,NULL);
@@ -258,60 +262,63 @@ void MX_FREERTOS_Init(void) {
 /* USER CODE END Header_StartDefaultTask */
 void StartDefaultTask(void *argument)
 {
-	HAL_UARTEx_ReceiveToIdle_DMA(&huart5, DMABuf_oridata_stp23L.Buf,userconfig_STP23L_DMABUF_LEN);
-	for(;;)
-	{
+  /* init code for USB_HOST */
+  MX_USB_HOST_Init();
+	HAL_UARTEx_ReceiveToIdle_DMA(&huart5, DMABuf_oridata_stp23L.Buf, userconfig_STP23L_DMABUF_LEN);
+	
   /* USER CODE BEGIN StartDefaultTask */
     // 初始化传感器（只做一次）
 //    while (!ICM20948_Init(&hi2c1)) {
 //    }
 //    // 然后这个任务什么都不做，让给 attitude_task 去算姿态
-//    for (;;)
-//    {
-//    }
-	  //vTaskDelete(NULL);
-		vTaskDelay(pdMS_TO_TICKS(500));
-	}
-  /* USER CODE END StartDefaultTask */
+			for (;;)
+{
+    vTaskDelay(pdMS_TO_TICKS(100));
 }
+    
+	  //vTaskDelete(NULL);
+	
+
+  /* USER CODE END StartDefaultTask */
+	}
 
 /* Private application code --------------------------------------------------*/
 /* USER CODE BEGIN Application */
-#if ( 1 == userconfig_RTOS_DEBUG )
-void RTOSDebugTask(void *param)
-{
-    uint16_t* delaytime = (uint16_t*)param;
-    static char showbuf[800];
+//#if ( 1 == userconfig_RTOS_DEBUG )
+//void RTOSDebugTask(void *param)
+//{
+//    uint16_t* delaytime = (uint16_t*)param;
+//    static char showbuf[800];
 
-    while( 1 )
-    {
-        if (xSemaphoreTake(g_xMutex_Printf, portMAX_DELAY) == pdTRUE)
-        {
-            vTaskGetRunTimeStats(showbuf);
-            printf("TaskName\tUseTime\tCPU\r\n");
-            printf("%s\r\n", showbuf);
-            xSemaphoreGive(g_xMutex_Printf);
-        }
-        vTaskDelay(*delaytime);
+//    while( 1 )
+//    {
+//        if (xSemaphoreTake(g_xMutex_Printf, portMAX_DELAY) == pdTRUE)
+//        {
+//            vTaskGetRunTimeStats(showbuf);
+//            printf("TaskName\tUseTime\tCPU\r\n");
+//            printf("%s\r\n", showbuf);
+//            xSemaphoreGive(g_xMutex_Printf);
+//        }
+//        vTaskDelay(*delaytime);
 
-        if (xSemaphoreTake(g_xMutex_Printf, portMAX_DELAY) == pdTRUE)
-        {
-            vTaskList(showbuf);
-            printf("TaskName\tTaskState\tTaskPrio\tStackSize\tTaskNum\r\n");
-            printf("%s\r\n", showbuf);
-            xSemaphoreGive(g_xMutex_Printf);
-        }
-        vTaskDelay(*delaytime);
+//        if (xSemaphoreTake(g_xMutex_Printf, portMAX_DELAY) == pdTRUE)
+//        {
+//            vTaskList(showbuf);
+//            printf("TaskName\tTaskState\tTaskPrio\tStackSize\tTaskNum\r\n");
+//            printf("%s\r\n", showbuf);
+//            xSemaphoreGive(g_xMutex_Printf);
+//        }
+//        vTaskDelay(*delaytime);
 
-        if (xSemaphoreTake(g_xMutex_Printf, portMAX_DELAY) == pdTRUE)
-        {
-            printf("free heap size : %d bytes\r\n\r\n", xPortGetFreeHeapSize());
-            xSemaphoreGive(g_xMutex_Printf);
-        }
-        vTaskDelay(*delaytime);
-    }
-}
-#endif
+//        if (xSemaphoreTake(g_xMutex_Printf, portMAX_DELAY) == pdTRUE)
+//        {
+//            printf("free heap size : %d bytes\r\n\r\n", xPortGetFreeHeapSize());
+//            xSemaphoreGive(g_xMutex_Printf);
+//        }
+//        vTaskDelay(*delaytime);
+//    }
+//}
+//#endif
 
 /* USER CODE END Application */
 

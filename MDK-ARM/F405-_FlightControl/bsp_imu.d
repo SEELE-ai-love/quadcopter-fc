@@ -38,6 +38,8 @@ f405-_flightcontrol\bsp_imu.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal
 f405-_flightcontrol\bsp_imu.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_tim.h
 f405-_flightcontrol\bsp_imu.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_tim_ex.h
 f405-_flightcontrol\bsp_imu.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_uart.h
+f405-_flightcontrol\bsp_imu.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_hcd.h
+f405-_flightcontrol\bsp_imu.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_ll_usb.h
 f405-_flightcontrol\bsp_imu.o: ../F570_BSP/Inc/Bsp_iic.h
 f405-_flightcontrol\bsp_imu.o: D:\Keil_v5\ARM\ARMCC\Bin\..\include\math.h
 f405-_flightcontrol\bsp_imu.o: D:\Keil_v5\ARM\ARMCC\Bin\..\include\stdio.h

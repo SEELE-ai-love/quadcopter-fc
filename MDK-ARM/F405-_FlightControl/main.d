@@ -36,6 +36,8 @@ f405-_flightcontrol\main.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_pw
 f405-_flightcontrol\main.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_tim.h
 f405-_flightcontrol\main.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_tim_ex.h
 f405-_flightcontrol\main.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_uart.h
+f405-_flightcontrol\main.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_hcd.h
+f405-_flightcontrol\main.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_ll_usb.h
 f405-_flightcontrol\main.o: ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2/cmsis_os.h
 f405-_flightcontrol\main.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/FreeRTOS.h
 f405-_flightcontrol\main.o: ../Core/Inc/FreeRTOSConfig.h
@@ -52,6 +54,7 @@ f405-_flightcontrol\main.o: ../Core/Inc/dma.h
 f405-_flightcontrol\main.o: ../Core/Inc/i2c.h
 f405-_flightcontrol\main.o: ../Core/Inc/tim.h
 f405-_flightcontrol\main.o: ../Core/Inc/usart.h
+f405-_flightcontrol\main.o: ../USB_HOST/App/usb_host.h
 f405-_flightcontrol\main.o: ../Core/Inc/gpio.h
 f405-_flightcontrol\main.o: D:\Keil_v5\ARM\ARMCC\Bin\..\include\stdio.h
 f405-_flightcontrol\main.o: ../F570_BSP/Inc/Bsp_stp23L.h
