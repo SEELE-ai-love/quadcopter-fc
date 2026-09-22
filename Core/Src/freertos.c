@@ -26,6 +26,8 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "tim.h"
+#include "queue.h"
+#include "semphr.h"
 #include <stdio.h>
 #include "icm20948_reg.h"
 #include "Bsp_imu.h"

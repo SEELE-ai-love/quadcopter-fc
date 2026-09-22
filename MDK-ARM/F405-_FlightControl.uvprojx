@@ -1869,6 +1869,46 @@
               <FilePath>..\F570_BSP\Bsp_imu.c</FilePath>
             </File>
             <File>
+              <FileName>Bsp_imu_ekf.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\F570_BSP\Bsp_imu_ekf.c</FilePath>
+            </File>
+            <File>
+              <FileName>Bsp_mahony.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\F570_BSP\Bsp_mahony.c</FilePath>
+            </File>
+            <File>
+              <FileName>attitude_algorithm.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\F570_BSP\attitude_algorithm.c</FilePath>
+            </File>
+            <File>
+              <FileName>Bsp_imu_ekf.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\F570_BSP\Inc\Bsp_imu_ekf.h</FilePath>
+            </File>
+            <File>
+              <FileName>Bsp_mahony.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\F570_BSP\Inc\Bsp_mahony.h</FilePath>
+            </File>
+            <File>
+              <FileName>Bsp_mahony_forward.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\F570_BSP\Inc\Bsp_mahony_forward.h</FilePath>
+            </File>
+            <File>
+              <FileName>attitude_algorithm.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\F570_BSP\Inc\attitude_algorithm.h</FilePath>
+            </File>
+            <File>
+              <FileName>attitude_common.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\F570_BSP\Inc\attitude_common.h</FilePath>
+            </File>
+            <File>
               <FileName>SerialPllt.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\F570_BSP\SerialPllt.c</FilePath>

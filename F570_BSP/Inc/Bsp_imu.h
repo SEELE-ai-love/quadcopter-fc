@@ -1,39 +1,82 @@
 #ifndef __BSP_IMU_H
 #define __BSP_IMU_H
 
-#include "i2c.h"
+#include "main.h"
+#include "attitude_common.h"
 #include <stdint.h>
 
-extern float Kp;
-extern float KI;
-typedef struct {
-    float x, y, z;
-} XYZ_FLOAT_t;
 
-typedef struct {
-    XYZ_FLOAT_t accel;
-    XYZ_FLOAT_t gyro;
+/*
+ * ============================================================
+ * 三轴数据
+ * ============================================================
+ */
+typedef struct
+{
+    float x;
+    float y;
+    float z;
+
+} IMU_AXIS_T;
+
+
+/*
+ * ============================================================
+ * IMU数据结构
+ * ============================================================
+ */
+typedef struct
+{
+    IMU_AXIS_T accel;
+    IMU_AXIS_T gyro;
+
 } IMU_DATA_T;
 
-typedef struct {
-    float roll, pitch, yaw;
+
+/*
+ * ============================================================
+ * 姿态角结构体
+ * ============================================================
+ */
+typedef struct
+{
+    float roll;
+    float pitch;
+    float yaw;
+
 } ATTITUDE_DATA_T;
 
-typedef struct {
-    float q0, q1, q2, q3;
-} Quaternion_t;
 
+/*
+ * ============================================================
+ * 传感器自身固定零偏
+ * ============================================================
+ */
+extern IMU_DATA_T ZreoPoint;
+
+
+/*
+ * ============================================================
+ * 传感器+机架安装角度偏差
+ * ============================================================
+ */
 extern ATTITUDE_DATA_T ZeroAttitude;
-extern Quaternion_t attitude;
 
-//【修复】返回值从void改成uint8_t，1=成功，0=失败，调用者必须检查
+
+/*
+ * ============================================================
+ * 初始化ICM20948
+ * ============================================================
+ */
 uint8_t ICM20948_Init(I2C_HandleTypeDef *hi2c);
-uint8_t ICM20948_Update(IMU_DATA_T *data, I2C_HandleTypeDef *hi2c);
 
-void Quaternation_Update(float gx, float gy, float gz,
-                          float ax, float ay, float az,
-                          float dt, Quaternion_t *q);
-void Quaternion_ToEuler(const Quaternion_t *q, float *roll, float *pitch, float *yaw);
+
+/*
+ * ============================================================
+ * 读取ICM20948
+ * ============================================================
+ */
+uint8_t ICM20948_Update(IMU_DATA_T *data,
+                        I2C_HandleTypeDef *hi2c);
 
 #endif
-													
