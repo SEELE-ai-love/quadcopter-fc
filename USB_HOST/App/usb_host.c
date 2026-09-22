@@ -24,8 +24,6 @@
 #include "usbh_core.h"
 #include "usbh_hid.h"
 
-
-
 /* USER CODE BEGIN Includes */
 
 /* USER CODE END Includes */
@@ -67,11 +65,6 @@ static void USBH_UserProcess(USBH_HandleTypeDef *phost, uint8_t id);
   * Init USB host library, add supported class and start the library
   * @retval None
   */
-//解释 MX_USB_HOST_Init代码的意思：（总共就干四件事）
-// ============================================================
-//第一：USBH_Init()是
-
-// ============================================================
 void MX_USB_HOST_Init(void)
 {
   /* USER CODE BEGIN USB_HOST_Init_PreTreatment */
@@ -81,11 +74,11 @@ void MX_USB_HOST_Init(void)
 	{
 		Error_Handler();
 	}
-	if (USBH_RegisterClass(&hUsbHostFS, &PS2_HID_Class) != USBH_OK) //cubemx选择class的数目为2时，开发者可以再自定义一个HID设备（PS2索尼手柄）
+	if (USBH_RegisterClass(&hUsbHostFS, &PS2_HID_Class) != USBH_OK) //cubemx选锟斤拷class锟斤拷锟斤拷目为2时锟斤拷锟斤拷锟斤拷锟竭匡拷锟斤拷锟斤拷锟皆讹拷锟斤拷一锟斤拷HID锟借备锟斤拷PS2锟斤拷锟斤拷锟街憋拷锟斤拷
 	{
 		Error_Handler();
 	}
-	if (USBH_RegisterClass(&hUsbHostFS, &WiredlessPS2_HID_Class) != USBH_OK) //cubemx勾选HID模式之后自带的代码（默认模式）
+	if (USBH_RegisterClass(&hUsbHostFS, &WiredlessPS2_HID_Class) != USBH_OK) //cubemx锟斤拷选HID模式之锟斤拷锟皆达拷锟侥达拷锟诫（默锟斤拷模式锟斤拷
 	{
 		Error_Handler();
 	}
@@ -94,7 +87,7 @@ void MX_USB_HOST_Init(void)
 	{
 		Error_Handler();
 	}
-  #pragma diag_suppress 111 //忽略无法到达的语句警告
+  #pragma diag_suppress 111 //锟斤拷锟斤拷锟睫凤拷锟斤拷锟斤拷锟斤拷锟戒警锟斤拷
   return;
   /* USER CODE END USB_HOST_Init_PreTreatment */
 

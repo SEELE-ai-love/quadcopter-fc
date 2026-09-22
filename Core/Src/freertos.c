@@ -19,12 +19,10 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include "FreeRTOS.h"
-#include "queue.h"
 #include "task.h"
 #include "main.h"
 #include "cmsis_os.h"
-#include "semphr.h"
-#include "usbh_core.h"
+
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "tim.h"
@@ -71,12 +69,12 @@
 /* USER CODE END 0 */
 /* USER CODE END Variables */
 /* Definitions for defaultTask */
-//osThreadId_t defaultTaskHandle;
-//const osThreadAttr_t defaultTask_attributes = {
-//  .name = "defaultTask",
-//  .stack_size = 128 * 4,
-//  .priority = (osPriority_t)1,
-//};
+osThreadId_t defaultTaskHandle;
+const osThreadAttr_t defaultTask_attributes = {
+  .name = "defaultTask",
+  .stack_size = 128 * 4,
+  .priority = (osPriority_t) osPriorityAboveNormal,
+};
 
 /* Private function prototypes -----------------------------------------------*/
 /* USER CODE BEGIN FunctionPrototypes */
@@ -228,7 +226,7 @@ void MX_FREERTOS_Init(void) {
 
   /* Create the thread(s) */
   /* creation of defaultTask */
-  //defaultTaskHandle = osThreadNew(StartDefaultTask, NULL, &defaultTask_attributes);
+  defaultTaskHandle = osThreadNew(StartDefaultTask, NULL, &defaultTask_attributes);
 
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
@@ -264,8 +262,6 @@ void StartDefaultTask(void *argument)
 {
   /* init code for USB_HOST */
   MX_USB_HOST_Init();
-	HAL_UARTEx_ReceiveToIdle_DMA(&huart5, DMABuf_oridata_stp23L.Buf, userconfig_STP23L_DMABUF_LEN);
-	
   /* USER CODE BEGIN StartDefaultTask */
     // 初始化传感器（只做一次）
 //    while (!ICM20948_Init(&hi2c1)) {
@@ -280,7 +276,7 @@ void StartDefaultTask(void *argument)
 	
 
   /* USER CODE END StartDefaultTask */
-	}
+}
 
 /* Private application code --------------------------------------------------*/
 /* USER CODE BEGIN Application */

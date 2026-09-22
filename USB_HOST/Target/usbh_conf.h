@@ -21,6 +21,7 @@
 /* Define to prevent recursive inclusion -------------------------------------*/
 #ifndef __USBH_CONF__H__
 #define __USBH_CONF__H__
+
 #ifdef __cplusplus
  extern "C" {
 #endif
@@ -96,7 +97,7 @@
 #if (USBH_USE_OS == 1)
   #include "cmsis_os.h"
   #define USBH_PROCESS_PRIO          osPriorityNormal
-  #define USBH_PROCESS_STACK_SIZE    ((uint16_t)1024)
+  #define USBH_PROCESS_STACK_SIZE    ((uint16_t)128)
 #endif /* (USBH_USE_OS == 1) */
 
 /**
@@ -189,6 +190,4 @@
 #ifdef __cplusplus
 }
 #endif
-
 #endif /* __USBH_CONF__H__ */
-
