@@ -1,0 +1,24 @@
+# Keil MDK build outputs
+*.bin
+*.o
+*.crf
+*.d
+*.axf
+*.hex
+*.map
+*.htm
+*.lnp
+*.lst
+*.dep
+*.bak
+*_sct.Bak
+MDK-ARM/F405-_FlightControl/
+
+# Keil user-local and generated files
+*.uvguix.*
+*.uvoptx
+MDK-ARM/.vscode/
+MDK-ARM/usb_rebuild.log
+
+# Temporary recovery snapshot
+_recovery_20260922/
