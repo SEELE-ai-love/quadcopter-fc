@@ -191,8 +191,19 @@ UART_HandleTypeDef *DebugSerial = &huart1;
 
 int fputc(int ch,FILE* stream)
 {
-	while( HAL_OK != HAL_UART_Transmit(DebugSerial,(const uint8_t *)&ch,1,100));
-	return ch;
+  (void)stream;
+
+  if (DebugSerial == NULL)
+  {
+    return EOF;
+  }
+
+  if (HAL_UART_Transmit(DebugSerial, (const uint8_t *)&ch, 1U, 10U) != HAL_OK)
+  {
+    return EOF;
+  }
+
+  return ch;
 }
 
 /**

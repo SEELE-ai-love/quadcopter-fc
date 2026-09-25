@@ -96,8 +96,8 @@
 
 #if (USBH_USE_OS == 1)
   #include "cmsis_os.h"
-  #define USBH_PROCESS_PRIO          osPriorityNormal
-  #define USBH_PROCESS_STACK_SIZE    ((uint16_t)128)
+  #define USBH_PROCESS_PRIO          osPriorityIdle
+  #define USBH_PROCESS_STACK_SIZE    ((uint16_t)1024U)
 #endif /* (USBH_USE_OS == 1) */
 
 /**

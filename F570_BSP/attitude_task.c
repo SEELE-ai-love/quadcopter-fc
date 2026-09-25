@@ -10,11 +10,16 @@
 #include "Bsp_iic.h"
 #include "icm20948_reg.h"
 #include "attitude_algorithm.h"
+#include "pid.h"
 
-/* ?? 共享姿态数据（只在本文件可见） */
+/* 共享姿态数据（只在本文件可见） */
 static float g_latest_roll  = 0.0f;
 static float g_latest_pitch = 0.0f;
 static float g_latest_yaw   = 0.0f;
+
+static float g_latest_gx = 0.0f;
+static float g_latest_gy = 0.0f;
+static float g_latest_gz = 0.0f;
 
 //========== 互斥锁 ==========//
 extern SemaphoreHandle_t g_xMutex_Printf;
@@ -34,20 +39,27 @@ void Attitude_GetLatest(float *roll, float *pitch, float *yaw)
     taskEXIT_CRITICAL();
 }
 
+void Attitude_GetGyro(float *gx, float *gy,float *gz)
+{
+	  /* 进入临界区，关闭中断 */
+    taskENTER_CRITICAL();
 
-/* ?? 姿态任务 */
+    *gx = g_latest_gx;
+    *gy = g_latest_gy;
+    *gz = g_latest_gz;
+	
+    /* 进入临界区，关闭中断 */
+    taskEXIT_CRITICAL();
+}
+
+/*  姿态任务 */
 void attitude_task(void *param)
 {
     IMU_DATA_T imu = {0};
     float roll = 0.0f, pitch = 0.0f, yaw = 0.0f;
-
+    uint32_t print_divider = 0U;
     TickType_t preTime;//pretime作为RTOS里面专门记录时间戳的变量
-
     (void)param;
-
-    preTime = xTaskGetTickCount();//获取当前系统Tick数
-
-
     /*
      * ========================================================
      * 姿态算法选择
@@ -68,90 +80,73 @@ void attitude_task(void *param)
     /* ?? 初始化失败就重试，避免带着错误状态继续跑 */
     while (!ICM20948_Init(&hi2c1))
     {
-        if(xSemaphoreTake(g_xMutex_Printf, portMAX_DELAY) == pdTRUE)
-        {
-            printf("ICM20948 init failed, retrying...\r\n");
-            xSemaphoreGive(g_xMutex_Printf);
-        }
-
         vTaskDelay(pdMS_TO_TICKS(200));
     }
 
-
-    // ========== 互斥锁保护 printf ==========
-    if(xSemaphoreTake(g_xMutex_Printf, portMAX_DELAY) == pdTRUE)
-    {
-        printf("ICM20948 init success\r\n");
-        xSemaphoreGive(g_xMutex_Printf);
-    }
-
-
+    preTime = xTaskGetTickCount();
     for (;;)
+      {
+    float dt = 1.0f / (float)ATTITUDE_TASK_FREQ;
+
+    if (ICM20948_Update(&imu, &hi2c1)) //IMU调用来进行姿态解算
     {
-        float dt = 1.0f / (float)ATTITUDE_TASK_FREQ;
+        /* 姿态解算 */
+        Attitude_Update(imu.gyro.x,
+                        imu.gyro.y,
+                        imu.gyro.z,
+                        imu.accel.x,
+                        imu.accel.y,
+                        imu.accel.z,
+                        dt);
+        Attitude_GetEuler(&roll,
+                          &pitch,
+                          &yaw);
+			
+//        Attitude_PID_Update(0.0f, 0.0f, 0.0f);
+        taskENTER_CRITICAL();
+			
+        //姿态角赋值
+        g_latest_roll  = roll;
+        g_latest_pitch = pitch;
+        g_latest_yaw   = yaw;
+			  //角速度赋值
+        g_latest_gx = imu.gyro.x;
+        g_latest_gy = imu.gyro.y;
+        g_latest_gz = imu.gyro.z;
+				
+        taskEXIT_CRITICAL();
 
-        if (ICM20948_Update(&imu, &hi2c1))
+        /* 10Hz output avoids saturating the blocking UART at 200Hz. */
+        print_divider++;
+        if (print_divider >= (ATTITUDE_TASK_FREQ / 10U))
         {
-            /*
-             * ==================================================
-             * 姿态解算
-             *
-             * 这里不再直接调用Mahony或者EKF。
-             *
-             * 由统一接口根据当前选择的算法进行计算。
-             * ==================================================
-             */
-            Attitude_Update(imu.gyro.x,
-                            imu.gyro.y,
-                            imu.gyro.z,
-                            imu.accel.x,
-                            imu.accel.y,
-                            imu.accel.z,
-                            dt);
+            print_divider = 0U;
 
-
-            /*
-             * ==================================================
-             * 获取统一姿态角
-             * ==================================================
-             */
-            Attitude_GetEuler(&roll,
-                              &pitch,
-                              &yaw);
-
-
-            /* 进入临界区，关闭中断 */
-            taskENTER_CRITICAL();
-
-            g_latest_roll  = roll;
-            g_latest_pitch = pitch;
-            g_latest_yaw   = yaw;
-
-            /* 推出临界区，开启中断 */
-            taskEXIT_CRITICAL();
-
-
-            if(xSemaphoreTake(g_xMutex_Printf, portMAX_DELAY) == pdTRUE)
+            if (xSemaphoreTake(g_xMutex_Printf, portMAX_DELAY) == pdTRUE)
             {
-                /*
-                 * 小数点后三位
-                 */
-                printf("%.3f,%.3f,%.3f\r\n",
-                       roll,
-                       pitch,
-                       yaw);
+//							printf("Angle: R=%.3f P=%.3f Y=%.3f | "
+//              "RateTarget: R=%.3f P=%.3f Y=%.3f\r\n",
+//              roll,
+//              pitch,
+//              yaw,
+//              RollRateTarget,
+//              PitchRateTarget,
+//              YawRateTarget);
+//                printf("%.3f,%.3f,%.3f\r\n",
+//                       roll,
+//                       pitch,
+//                       yaw);
 
                 xSemaphoreGive(g_xMutex_Printf);
             }
         }
-        else
-        {
-            //printf("IMU read failed, skip this cycle\r\n");
-        }
-
-        /* 固定200Hz周期 */
-        /*加入preTimr之后，等到上一拍结束之后，在开始5ms延时*/
-        vTaskDelayUntil(&preTime,
-                        pdMS_TO_TICKS(1000.0f / ATTITUDE_TASK_FREQ));
     }
+    else
+    {
+        /* Skip this sample; the next loop retries the IMU read. */
+    }
+
+    vTaskDelayUntil(&preTime,
+                    pdMS_TO_TICKS(1000.0f / ATTITUDE_TASK_FREQ));
+}
 }

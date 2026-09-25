@@ -74,8 +74,8 @@
 osThreadId_t defaultTaskHandle;
 const osThreadAttr_t defaultTask_attributes = {
   .name = "defaultTask",
-  .stack_size = 128 * 4,
-  .priority = (osPriority_t) osPriorityAboveNormal,
+  .stack_size = 1024 * 4,
+  .priority = (osPriority_t) osPriorityIdle,
 };
 
 /* Private function prototypes -----------------------------------------------*/
@@ -90,6 +90,7 @@ void RTOSDebugTask(void *param);
 void StartDefaultTask(void *argument);
 
 extern void MX_USB_HOST_Init(void);
+extern UART_HandleTypeDef *DebugSerial;
 void MX_FREERTOS_Init(void); /* (MISRA C 2004 rule 8.1) */
 
 /* Hook prototypes */
@@ -150,17 +151,31 @@ void vApplicationIdleHook( void )
 
 /* USER CODE BEGIN 4 */
 
+static void DebugUart_RawWrite(const char *text)
+{
+  if ((DebugSerial != NULL) && (text != NULL))
+  {
+    (void)HAL_UART_Transmit(DebugSerial,
+                            (const uint8_t *)text,
+                            (uint16_t)strlen(text),
+                            5U);
+  }
+}
+
 void vApplicationStackOverflowHook(xTaskHandle xTask, signed char *pcTaskName)
 {
    /* Run time stack overflow checking is performed if
    configCHECK_FOR_STACK_OVERFLOW is defined to 1 or 2. This hook function is
    called if a stack overflow is detected. */
-	//检测是否发生栈溢出
-	if(xSemaphoreTake(g_xMutex_Printf, portMAX_DELAY) == pdTRUE)
-	{
-		printf("%s stack overflow\r\n", pcTaskName);
-				xSemaphoreGive(g_xMutex_Printf);
-	}
+  (void)xTask;
+  DebugUart_RawWrite("stack overflow: ");
+  DebugUart_RawWrite((const char *)pcTaskName);
+  DebugUart_RawWrite("\r\n");
+
+  taskDISABLE_INTERRUPTS();
+  for (;;)
+  {
+  }
 }
 
 
@@ -180,12 +195,13 @@ void vApplicationMallocFailedHook(void)
    to query the size of free heap space that remains (although it does not
    provide information on how the remaining heap might be fragmented). */
 	
-  //内存分配失败函数
-		if(xSemaphoreTake(g_xMutex_Printf, portMAX_DELAY) == pdTRUE)
-	{
-		printf("malloc failed. check heapsize\r\n");
-			xSemaphoreGive(g_xMutex_Printf);
-	}
+	//内存分配失败函数
+  DebugUart_RawWrite("malloc failed. check heap size\r\n");
+
+  taskDISABLE_INTERRUPTS();
+  for (;;)
+  {
+  }
 }
 
 /* USER CODE END 5 */
@@ -207,8 +223,7 @@ void MX_FREERTOS_Init(void) {
   g_xMutex_Printf = xSemaphoreCreateMutex();
   if(g_xMutex_Printf == NULL)
   {
-    // 互斥锁创建失败，这里可以加错误处理
-    while(1); // 死循环，方便调试发现问题
+    Error_Handler();
   }
   /* USER CODE END RTOS_MUTEX */
 
@@ -224,11 +239,19 @@ void MX_FREERTOS_Init(void) {
   /* add queues, ... */
 	//STP23L模块队列任务
 	g_xQueueSTP23L_Ori = xQueueCreate(3, sizeof(OriData_STP23L_t));
+  if (g_xQueueSTP23L_Ori == NULL)
+  {
+    Error_Handler();
+  }
   /* USER CODE END RTOS_QUEUES */
 
   /* Create the thread(s) */
   /* creation of defaultTask */
   defaultTaskHandle = osThreadNew(StartDefaultTask, NULL, &defaultTask_attributes);
+  if (defaultTaskHandle == NULL)
+  {
+    Error_Handler();
+  }
 
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
@@ -243,11 +266,22 @@ void MX_FREERTOS_Init(void) {
   /* USER CODE END RTOS_THREADS */
 
   /* USER CODE BEGIN RTOS_EVENTS */
-	xTaskCreate(StartDefaultTask, "defaultTask", 512, NULL, 1, NULL);
-	xTaskCreate(attitude_task,"Attitude", 512, NULL, 3, NULL);
-	xTaskCreate(control_task,"Control",512,NULL,2,NULL);
-	xTaskCreate(power_task,"Power",512,NULL,1,NULL);
-	xTaskCreate(STP23L_task, "STP23L", 512, NULL, 2, NULL); 
+	if (xTaskCreate(attitude_task, "Attitude", 1024, NULL, 2, NULL) != pdPASS)
+	{
+	  Error_Handler();
+	}
+	if (xTaskCreate(control_task, "Control", 512, NULL, 3, NULL) != pdPASS)
+	{
+	  Error_Handler();
+	}
+	if (xTaskCreate(power_task, "Power", 512, NULL, 1, NULL) != pdPASS)
+	{
+	  Error_Handler();
+	}
+	if (xTaskCreate(STP23L_task, "STP23L", 512, NULL, 2, NULL) != pdPASS)
+	{
+	  Error_Handler();
+	}
   /* add events, ... */
   /* USER CODE END RTOS_EVENTS */
 

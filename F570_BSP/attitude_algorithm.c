@@ -221,12 +221,12 @@ void Attitude_GetEuler(float *roll,
 {
     if (roll != NULL)
     {
-        *roll = g_roll;
+        *roll =-g_roll;
     }
 
     if (pitch != NULL)
     {
-        *pitch = g_pitch;
+        *pitch =-g_pitch;
     }
 
     if (yaw != NULL)

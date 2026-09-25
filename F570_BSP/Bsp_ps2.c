@@ -1111,9 +1111,20 @@ static void gamepad_get_input(GamepadInput_t *out)
 	out->connected = (Appli_state == APPLICATION_READY) ? 1U : 0U;
 }
 
+static PS2KEY_State_t gamepad_get_key_event(uint8_t keybit)
+{
+    if (keybit >= 16U)
+    {
+        return PS2KEYSTATE_NONE;
+    }
+
+    return ps2_info.getKeyEvent(keybit);
+}
+
 /* 挂载点：跟 Dshot.c 的 UserDshotMotor 一模一样的写法 */
 GamepadInterface_t UserGamepad =
 {
-	.init      = gamepad_init,
-	.get_input = gamepad_get_input,
+    .init        = gamepad_init,
+    .get_input   = gamepad_get_input,
+    .getKeyEvent = gamepad_get_key_event,
 };

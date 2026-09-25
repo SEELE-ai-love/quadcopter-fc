@@ -1948,6 +1948,16 @@
               <FileType>1</FileType>
               <FilePath>..\F570_BSP\PS2_task.c</FilePath>
             </File>
+            <File>
+              <FileName>Bsp_buzzer.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\F570_BSP\Bsp_buzzer.c</FilePath>
+            </File>
+            <File>
+              <FileName>pid.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\F570_BSP\pid.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>

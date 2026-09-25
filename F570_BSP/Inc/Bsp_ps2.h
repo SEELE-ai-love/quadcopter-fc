@@ -96,11 +96,11 @@ typedef struct
 }GamepadInput_t;
 
 /* 驱动接口 */
-typedef struct
-{
-	void (*init)(void);
-	void (*get_input)(GamepadInput_t *out);
-}GamepadInterface_t, *pGamepadInterface_t;
+typedef struct {
+    void (*init)(void);
+    void (*get_input)(GamepadInput_t *out);
+    PS2KEY_State_t (*getKeyEvent)(uint8_t keybit);
+} GamepadInterface_t, *pGamepadInterface_t;
 
 extern GamepadInterface_t UserGamepad;   //UserGamepad包含六组结构体数据
 

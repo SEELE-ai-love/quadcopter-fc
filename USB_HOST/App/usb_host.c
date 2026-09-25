@@ -72,20 +72,24 @@ void MX_USB_HOST_Init(void)
 	extern USBH_ClassTypeDef  WiredlessPS2_HID_Class;
 	if (USBH_Init(&hUsbHostFS, USBH_UserProcess, HOST_FS) != USBH_OK)
 	{
-		Error_Handler();
+		Appli_state = APPLICATION_DISCONNECT;
+		return;
 	}
 	if (USBH_RegisterClass(&hUsbHostFS, &PS2_HID_Class) != USBH_OK) //cubemxѡ��class����ĿΪ2ʱ�������߿������Զ���һ��HID�豸��PS2�����ֱ���
 	{
-		Error_Handler();
+		Appli_state = APPLICATION_DISCONNECT;
+		return;
 	}
 	if (USBH_RegisterClass(&hUsbHostFS, &WiredlessPS2_HID_Class) != USBH_OK) //cubemx��ѡHIDģʽ֮���Դ��Ĵ��루Ĭ��ģʽ��
 	{
-		Error_Handler();
+		Appli_state = APPLICATION_DISCONNECT;
+		return;
 	}
 
 	if (USBH_Start(&hUsbHostFS) != USBH_OK)
 	{
-		Error_Handler();
+		Appli_state = APPLICATION_DISCONNECT;
+		return;
 	}
   #pragma diag_suppress 111 //�����޷��������侯��
   return;
@@ -94,15 +98,18 @@ void MX_USB_HOST_Init(void)
   /* Init host Library, add supported class and start the library. */
   if (USBH_Init(&hUsbHostFS, USBH_UserProcess, HOST_FS) != USBH_OK)
   {
-    Error_Handler();
+    Appli_state = APPLICATION_DISCONNECT;
+    return;
   }
   if (USBH_RegisterClass(&hUsbHostFS, USBH_HID_CLASS) != USBH_OK)
   {
-    Error_Handler();
+    Appli_state = APPLICATION_DISCONNECT;
+    return;
   }
   if (USBH_Start(&hUsbHostFS) != USBH_OK)
   {
-    Error_Handler();
+    Appli_state = APPLICATION_DISCONNECT;
+    return;
   }
   /* USER CODE BEGIN USB_HOST_Init_PostTreatment */
 

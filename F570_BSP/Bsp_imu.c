@@ -38,7 +38,6 @@ uint8_t ICM20948_Init(I2C_HandleTypeDef*hi2c)
 
     if (whoami != 0xEA)
     {
-        printf("ICM20948 not found! whoami=0x%02X\r\n", whoami);
         return 0;
     }
 
@@ -62,8 +61,6 @@ uint8_t ICM20948_Init(I2C_HandleTypeDef*hi2c)
 
     //I2C_WriteReg(hi2c, ICM20948_DEV, INT_PIN_CFG, (1 << 1));// 开I2C旁路，暴露AK09916
     //I2C_WriteReg(hi2c, AK09916_DEV, CNTL2, (1 << 3));// 磁力计：连续模式4，100Hz
-
-    printf("ICM20948_init OK!\r\n");
 
     return 1;
 }
