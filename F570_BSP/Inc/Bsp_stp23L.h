@@ -13,7 +13,7 @@ typedef struct {
 }OriData_STP23L_t;
 
 //STP23L数据处理和输出接口
-extern float g_readonly_distance;//这个就是高度
+extern float g_readonly_distance;//这个就是高度.control_task里面调用，或者STP23L_task里面调用
 extern OriData_STP23L_t DMABuf_oridata_stp23L;// DMABuf_oridata_stp23L包含结构体的两个成员。一个DataLen，另一个Buf，是DMA搬运的数据
 
 //必须按顺序、一个不漏地喂字节，不能一次性把一整包数据丢给它

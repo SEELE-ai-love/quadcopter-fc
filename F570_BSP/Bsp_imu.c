@@ -11,11 +11,10 @@
 #define EINT_LIMIT 0.3f
 //加速度计可信区间判断
 #define ACCEL_TRUST_LOW 0.85f
-#define ACCEL_TRUST_HIGH 1.15f
+#define ACCEL_TRUST_HIGH 11.1f
 
 //定义全局变量
-IMU_DATA_T ZreoPoint ={0};//传感器自身固定零偏-
-ATTITUDE_DATA_T ZeroAttitude = { -0.17f,1.82f,2.16f};//传感器+机架安装角度偏差(改正方向后重测)
+IMU_DATA_T ZreoPoint ={0};//传感器自身固定零偏
 
 /*
  * ============================================================
@@ -98,9 +97,9 @@ uint8_t ICM20948_Update(IMU_DATA_T*data,I2C_HandleTypeDef *hi2c)
     data->gyro.y *= 0.01745329252f;
     data->gyro.z *= 0.01745329252f;
 
-    data->gyro.x -= 0.0100f;
-    data->gyro.y += 0.0021f;
-    data->gyro.z += 0.0020f;
+    data->gyro.x -= 0.01067f;  //注意：这里的gyro已经转换成弧度制了
+    data->gyro.y -= 0.00100f;
+    data->gyro.z += 0.00167f;
 
     return 1;
 }

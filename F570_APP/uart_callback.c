@@ -44,8 +44,13 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 	
 	if( huart == &huart4 ) //蓝牙使用的串口
 	{
+		extern QueueHandle_t g_xQueueBlueTooth_Ori;
 		//复位BootLoadr检测指令
 		_System_Reset_(uart4_recv);
+		
+	  //把接收到的字符写入队列
+		xQueueSendFromISR(g_xQueueBlueTooth_Ori, &uart4_recv,
+                          &xHigherPriorityTaskWoken);
 		
 		HAL_UART_Receive_IT(&huart4,&uart4_recv,1);
 	}

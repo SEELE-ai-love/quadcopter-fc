@@ -1,6 +1,11 @@
 #include "Bsp_stp23L.h"
 #include <stdio.h>
 #include <string.h>
+#include "FreeRTOS.h"
+#include "task.h"
+
+
+
 
 OriData_STP23L_t DMABuf_oridata_stp23L;
 float g_readonly_distance =0;
@@ -79,7 +84,7 @@ void stp23L_getdistance_callback(uint8_t recv,float* dis)
 				for(uint8_t i=0;i<12;i++) alldist+=stp23L_frame.PointCloud[i].distance;
 				*dis = alldist/12.0f; //距离信息求均值	
 				*dis /= 1000.0f;      //单位由 mm 转为 m
-			}
+      }
 			else
 			{
 				//数据校验错误，*dis不会被更新，保持上一次的有效值
@@ -91,3 +96,4 @@ void stp23L_getdistance_callback(uint8_t recv,float* dis)
 		
 	}
 }
+

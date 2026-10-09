@@ -1,0 +1,9 @@
+ FILEPATH:D:/F405-_FlightControl/F405-_FlightControl/F405.bin
+     ADDR:F570-SPP
+     ADDR:WHEELTEC
+      MAC:3D:53:5D:CC:C8:79
+      MAC:None
+     PORT:1
+ PACKMODE:2k
+FLASHMODE:蓝牙模式
+       END

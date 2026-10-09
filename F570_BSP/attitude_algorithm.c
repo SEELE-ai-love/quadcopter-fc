@@ -19,6 +19,7 @@ static AttitudeAlgorithmType_t g_attitude_algorithm =
     ATTITUDE_ALGO_MAHONY;
 
 
+
 /*
  * ============================================================
  * EKF独立状态
@@ -27,16 +28,49 @@ static AttitudeAlgorithmType_t g_attitude_algorithm =
 static EKF_State_t g_ekf;
 
 
+
 /*
  * ============================================================
  * 统一姿态输出
  * ============================================================
  */
+/* 原始姿态角：算法直接算出来的角度 */
+static float g_raw_roll  = 0.0f;
+static float g_raw_pitch = 0.0f;
+static float g_raw_yaw   = 0.0f;
+
+/* 最终输出姿态角：原始角度 - 零点 */
 static float g_roll  = 0.0f;
 static float g_pitch = 0.0f;
 static float g_yaw   = 0.0f;
+/*
+ * ============================================================
+ * 姿态启动零点
+ * ============================================================
+ */
+static ATTITUDE_DATA_T AttitudeZero = {0};
 
 
+
+/*
+ * ============================================================
+ * 姿态零点采样
+ * ============================================================
+ */
+/* 开机先等100帧(0.5s)让EKF/Mahony收敛，再采200帧(1s)取平均做零点 */
+#define ATTITUDE_ZERO_WAIT_NUM   100
+#define ATTITUDE_ZERO_SAMPLE_NUM 200
+
+static uint16_t attitude_zero_wait_count = 0;
+static uint16_t attitude_zero_sample_count = 0;
+
+static float attitude_roll_sum  = 0.0f;
+static float attitude_pitch_sum = 0.0f;
+static float attitude_yaw_sum   = 0.0f;
+
+static uint8_t attitude_zero_ready = 0;
+static void Attitude_UpdateZero(void);
+static void Attitude_ApplyZero(void);
 /*
  * ============================================================
  * 四元数转欧拉角
@@ -49,54 +83,33 @@ static void Attitude_QuaternionToEuler(const Quaternion_t *q)
     float q2 = q->q2;
     float q3 = q->q3;
 
-    const float RAD_TO_DEG = 57.2958f;
 
-
-    /*
-     * Roll是滚转角
-     */
-    g_roll =
+    /* Roll */
+    g_raw_roll =
         atan2f(2.0f * (q0 * q1 + q2 * q3),
-               1.0f - 2.0f * (q1 * q1 + q2 * q2))
-        * RAD_TO_DEG;
+               1.0f - 2.0f * (q1 * q1 + q2 * q2));
 
-
-    /*
-     * Pitch是俯仰角
-     */
+    /* Pitch */
     float pitch_value =
         2.0f * (q0 * q2 - q3 * q1);
 
-    /*
-     * 防止浮点误差导致asinf输入超过[-1,1]
-     */
     if (pitch_value > 1.0f)
-    {
         pitch_value = 1.0f;
-    }
-    else if (pitch_value < -1.0f)
-    {
+
+    if (pitch_value < -1.0f)
         pitch_value = -1.0f;
-    }
 
-    g_pitch = asinf(pitch_value) * RAD_TO_DEG;
+    g_raw_pitch = asinf(pitch_value);
 
-
-    /*
-     * Yaw是偏航角（这个需要磁力计介入）
-     */
-    g_yaw =
+    /* Yaw */
+    g_raw_yaw =
         atan2f(2.0f * (q0 * q3 + q1 * q2),
-               1.0f - 2.0f * (q2 * q2 + q3 * q3))
-        * RAD_TO_DEG;
+               1.0f - 2.0f * (q2 * q2 + q3 * q3));
 
-
-    /*
-     * 保留你原来的机架安装角度修正
-     */
-    g_roll  -= ZeroAttitude.roll;
-    g_pitch -= ZeroAttitude.pitch;
-    g_yaw   -= ZeroAttitude.yaw;
+    /* 默认先让最终输出等于原始值 */
+    g_roll  = g_raw_roll;
+    g_pitch = g_raw_pitch;
+    g_yaw   = g_raw_yaw;
 }
 
 
@@ -113,6 +126,18 @@ void Attitude_Init(AttitudeAlgorithmType_t type)
     g_pitch = 0.0f;
     g_yaw   = 0.0f;
 
+    attitude_zero_wait_count = 0;
+    attitude_zero_sample_count = 0;
+
+    attitude_roll_sum = 0.0f;
+    attitude_pitch_sum = 0.0f;
+    attitude_yaw_sum = 0.0f;
+
+    attitude_zero_ready = 0;
+
+    AttitudeZero.roll = 0.0f;
+    AttitudeZero.pitch = 0.0f;
+    AttitudeZero.yaw = 0.0f;
 
     if (type == ATTITUDE_ALGO_MAHONY)
     {
@@ -124,7 +149,6 @@ void Attitude_Init(AttitudeAlgorithmType_t type)
     }
 }
 
-
 /*
  * ============================================================
  * 切换姿态算法
@@ -132,13 +156,13 @@ void Attitude_Init(AttitudeAlgorithmType_t type)
  */
 void Attitude_SetAlgorithm(AttitudeAlgorithmType_t type)
 {
+
     /*
      * 切换算法时重新初始化对应算法状态
      */
     Attitude_Init(type);
+
 }
-
-
 /*
  * ============================================================
  * 获取当前算法
@@ -148,6 +172,7 @@ AttitudeAlgorithmType_t Attitude_GetAlgorithm(void)
 {
     return g_attitude_algorithm;
 }
+
 
 
 /*
@@ -163,76 +188,152 @@ void Attitude_Update(float gx,
                      float az,
                      float dt)
 {
+
+
     /*
      * ========================================================
      * Mahony
      * ========================================================
      */
-	
-    if (g_attitude_algorithm == ATTITUDE_ALGO_MAHONY)
-    {
-        Mahony_Update(gx,
-                      gy,
-                      gz,
-                      ax,
-                      ay,
-                      az,
-                      dt);
+   if (g_attitude_algorithm == ATTITUDE_ALGO_MAHONY)
+{
+    Mahony_Update(gx, gy, gz,
+                  ax, ay, az,
+                  dt);
 
-        Quaternion_t temp_q = Mahony_GetQuaternion();
-        Attitude_QuaternionToEuler(&temp_q);
+    Quaternion_t temp_q = Mahony_GetQuaternion();
+
+    Attitude_QuaternionToEuler(&temp_q);
+}
+else
+{
+    EKF_Update(gx, gy, gz,
+               ax, ay, az,
+               dt,
+               &g_ekf);
+
+    Attitude_QuaternionToEuler(&g_ekf.q);
+}
+
+/* 原始姿态角已经算完 */
+
+if (!attitude_zero_ready)
+{
+    Attitude_UpdateZero();
+}
+
+/* 零点采样完成后，对当前姿态进行补偿 */
+Attitude_ApplyZero();
+
+}
+
+
+static void Attitude_UpdateZero(void)
+{
+    /* 前500ms只等待姿态算法稳定 */
+    if (attitude_zero_wait_count < ATTITUDE_ZERO_WAIT_NUM)
+    {
+        attitude_zero_wait_count++;
+        return;
     }
 
-
-    /*
-     * ========================================================
-     * EKF
-     * ========================================================
-     */
-    else
+    /* 开始正式采样 */
+    if (attitude_zero_sample_count < ATTITUDE_ZERO_SAMPLE_NUM)
     {
-        EKF_Update(gx,
-                   gy,
-                   gz,
-                   ax,
-                   ay,
-                   az,
-                   dt,
-                   &g_ekf);
-//测试飞控板子平放时候的零偏
-//			printf("EKF bx=%.6f, by=%.6f\r\n",
-//       g_ekf.bias_gx,
-//       g_ekf.bias_gy);
+attitude_roll_sum  += g_raw_roll;
+attitude_pitch_sum += g_raw_pitch;
+attitude_yaw_sum   += g_raw_yaw;
 
-        Attitude_QuaternionToEuler(
-            &g_ekf.q);
+        attitude_zero_sample_count++;
+
+        /* 200个样本全部采完 */
+        if (attitude_zero_sample_count >= ATTITUDE_ZERO_SAMPLE_NUM)
+        {
+            AttitudeZero.roll =
+                attitude_roll_sum / (float)ATTITUDE_ZERO_SAMPLE_NUM;
+
+            AttitudeZero.pitch =
+                attitude_pitch_sum / (float)ATTITUDE_ZERO_SAMPLE_NUM;
+
+            AttitudeZero.yaw =
+                attitude_yaw_sum / (float)ATTITUDE_ZERO_SAMPLE_NUM;
+
+            attitude_zero_ready = 1;
+        }
+
+        return;
     }
 }
 
+static void Attitude_ApplyZero(void)
+{
+    if (!attitude_zero_ready)
+    {
+        g_roll  = g_raw_roll;
+        g_pitch = g_raw_pitch;
+        g_yaw   = g_raw_yaw;
+        return;
+    }
+
+    g_roll  = g_raw_roll  - AttitudeZero.roll;
+    g_pitch = g_raw_pitch - AttitudeZero.pitch;
+    g_yaw   = g_raw_yaw   - AttitudeZero.yaw;
+}
 
 /*
  * ============================================================
  * 获取统一欧拉角
+ *
+ * roll  ：°
+ * pitch ：°
+ * yaw   ：°
  * ============================================================
  */
 void Attitude_GetEuler(float *roll,
                        float *pitch,
                        float *yaw)
 {
+
+
     if (roll != NULL)
     {
-        *roll =-g_roll;
+        *roll = -g_roll;
     }
+
+
 
     if (pitch != NULL)
     {
-        *pitch =-g_pitch;
+        *pitch = -g_pitch;
     }
+
+
 
     if (yaw != NULL)
     {
         *yaw = g_yaw;
     }
+
+}
+
+/*
+ * ============================================================
+ * 零点获取函数
+ *
+ * ============================================================
+ */
+void Attitude_GetZero(float *roll,
+                      float *pitch,
+                      float *yaw)
+{
+    if (roll != NULL)
+        *roll = AttitudeZero.roll;
+
+    if (pitch != NULL)
+        *pitch = AttitudeZero.pitch;
+
+    if (yaw != NULL)
+        *yaw = AttitudeZero.yaw;
 }
 
 
@@ -243,10 +344,19 @@ void Attitude_GetEuler(float *roll,
  */
 const char *Attitude_GetAlgorithmName(void)
 {
+
     if (g_attitude_algorithm == ATTITUDE_ALGO_MAHONY)
     {
         return "Mahony";
     }
 
+
+
     return "EKF";
+
+}
+
+uint8_t Attitude_IsZeroReady(void)
+{
+    return attitude_zero_ready;
 }

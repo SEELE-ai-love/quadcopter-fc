@@ -2,7 +2,7 @@
 #define __PID_H
 
 #include <stdint.h>
-#include "attitude_algorithm.h" 
+
 
 typedef struct{
 	float kp; // 比例增益
@@ -55,23 +55,19 @@ extern PIDControllerType_t YawPID;
 
 extern PIDControllerType_t RollRatePID;
 extern PIDControllerType_t PitchRatePID;
-extern PIDControllerType_t YawRatePID;
-/* 【新增】角度环 */
-extern PIDControllerType_t RollPID;
-extern PIDControllerType_t PitchPID;
-extern PIDControllerType_t YawPID;
+extern PIDControllerType_t YawRatePID;;
 
 
-/* 【新增】先保存角度环产生的目标角速度 */
-extern float RollRateTarget;
-extern float PitchRateTarget;
-extern float YawRateTarget;
-
-
+/* 【新增】高度环 */
+extern PIDControllerType_t HeightPID;
+extern PIDControllerType_t HeightRatePID;
 /* 【新增】只做角度外环 */
 void Attitude_PID_Update(float roll_target,
                          float pitch_target,
                          float yaw_target);
-
+//show_task图像，图像曲线调试
+extern float RollRateTarget;
+extern float PitchRateTarget;
+extern float YawRateTarget;
 #endif
 

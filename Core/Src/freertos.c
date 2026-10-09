@@ -22,6 +22,7 @@
 #include "task.h"
 #include "main.h"
 #include "cmsis_os.h"
+#include "timers.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
@@ -40,11 +41,28 @@
 #include "Bsp_stp23L.h"
 #include "STP23L_task.h"
 #include "usb_host.h"
+#include "show_task.h"
+#include "Bluetooth_task.h"
+#include "Bsp_buzzer.h"
+#include "PS2_task.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
 /* USER CODE BEGIN PTD */
-
+//记住整个Free RTOS的框图：
+//MX_FREERTOS_Init()
+//│
+//├── 创建 Mutex 互斥锁
+//│
+//├── 创建 Semaphore 信号量
+//│
+//├── 创建 Timer Free RTOS软件定时器
+//│
+//├── 创建 Queue 队列
+//│ 
+//├── 创建 Task 任务
+//│
+//└── 创建 Event Group 事件组
 /* USER CODE END PTD */
 
 /* Private define ------------------------------------------------------------*/
@@ -62,9 +80,15 @@
 /* USER CODE BEGIN Variables */
 /* USER CODE BEGIN 0 */
 
- QueueHandle_t g_xQueueSTP23L_Ori=NULL;//队列任务句柄
+//队列创建
+ QueueHandle_t g_xQueueSTP23L_Ori=NULL;//激光雷达队列任务句柄
+ QueueHandle_t g_xQueueBlueTooth_Ori = NULL;//蓝牙软件队列任务句柄
+ QueueHandle_t g_xQueueFlyControl; //PS手柄队列任务句柄
+//互斥锁创建
  SemaphoreHandle_t g_xMutex_Printf = NULL;//printf互斥锁句柄
- 
+//定时器创建
+ TimerHandle_t g_BuzzerSuccessTimer;
+ TimerHandle_t g_BuzzerFailTimer;
  
 #include <string.h>
 #include <stdlib.h>
@@ -233,13 +257,42 @@ void MX_FREERTOS_Init(void) {
 
   /* USER CODE BEGIN RTOS_TIMERS */
   /* start timers, add new ones, ... */
+  // ========== 在这里创建 RTOS定时器事件 ==========
+	g_BuzzerSuccessTimer = xTimerCreate(
+    "BuzzerOK",                  // 定时器名字
+    pdMS_TO_TICKS(10),           // 定时时间：10ms
+    pdFALSE,                     // 不自动重复，单次定时器
+    NULL,                        // Timer ID
+    Timer_SuccessCallback        // 时间到了以后调用的回调
+);
+
+/* 失败提示定时器 */
+g_BuzzerFailTimer = xTimerCreate(
+    "BuzzerERR",                 // 定时器名字
+    pdMS_TO_TICKS(10),            // 定时时间：10ms
+    pdFALSE,                      // 单次定时器
+    NULL,                         // Timer ID
+    Timer_FailCallback            // 时间到了以后调用的回调
+);
   /* USER CODE END RTOS_TIMERS */
 
   /* USER CODE BEGIN RTOS_QUEUES */
   /* add queues, ... */
-	//STP23L模块队列任务
+	//STP23L模块队列模块
 	g_xQueueSTP23L_Ori = xQueueCreate(3, sizeof(OriData_STP23L_t));
-  if (g_xQueueSTP23L_Ori == NULL)
+  if (g_xQueueSTP23L_Ori == NULL)//如果内存不足创建失败，返回NULL
+  {
+    Error_Handler();
+  }
+	//蓝牙软件队列模块
+	g_xQueueBlueTooth_Ori = xQueueCreate(128, sizeof(uint8_t));
+  if(g_xQueueBlueTooth_Ori == NULL)
+  {
+    Error_Handler();
+  }
+	//PS手柄队列模块
+	g_xQueueFlyControl = xQueueCreate(1,sizeof(FlyControlType_t));
+	if(g_xQueueFlyControl == NULL)
   {
     Error_Handler();
   }
@@ -266,11 +319,11 @@ void MX_FREERTOS_Init(void) {
   /* USER CODE END RTOS_THREADS */
 
   /* USER CODE BEGIN RTOS_EVENTS */
-	if (xTaskCreate(attitude_task, "Attitude", 1024, NULL, 2, NULL) != pdPASS)
+	if (xTaskCreate(attitude_task, "Attitude", 1024, NULL, 3, NULL) != pdPASS)
 	{
 	  Error_Handler();
 	}
-	if (xTaskCreate(control_task, "Control", 512, NULL, 3, NULL) != pdPASS)
+	if (xTaskCreate(control_task, "Control", 512, NULL, 2, NULL) != pdPASS)
 	{
 	  Error_Handler();
 	}
@@ -282,6 +335,18 @@ void MX_FREERTOS_Init(void) {
 	{
 	  Error_Handler();
 	}
+	if(xTaskCreate(show_task, "show_task", 512, NULL, 1, NULL) != pdPASS)
+	{
+		 Error_Handler();
+	}
+	if(xTaskCreate(Bluetooth_task,"BTAPPTask",256,NULL,1,NULL) !=pdPASS)//xTaskCreate()第一个参数必须是void Bluetooth_task(void *param)这样的;
+	{
+		 Error_Handler();
+	}
+	if(xTaskCreate(PS2_task, "PS2", 256, NULL, 2, NULL) != pdPASS)
+{
+    Error_Handler();
+}
   /* add events, ... */
   /* USER CODE END RTOS_EVENTS */
 
@@ -296,22 +361,24 @@ void MX_FREERTOS_Init(void) {
 /* USER CODE END Header_StartDefaultTask */
 void StartDefaultTask(void *argument)
 {
-  /* init code for USB_HOST */
-  MX_USB_HOST_Init();
-  /* USER CODE BEGIN StartDefaultTask */
-    // 初始化传感器（只做一次）
-//    while (!ICM20948_Init(&hi2c1)) {
-//    }
-//    // 然后这个任务什么都不做，让给 attitude_task 去算姿态
-			for (;;)
-{
-    vTaskDelay(pdMS_TO_TICKS(100));
-}
-    
-	  //vTaskDelete(NULL);
-	
+    /* 初始化 USB Host */
+    MX_USB_HOST_Init();
 
-  /* USER CODE END StartDefaultTask */
+    /* 启动 STP23L 激光测距：UART5 + DMA + 空闲中断 */
+    HAL_UARTEx_ReceiveToIdle_DMA(
+        &huart5,
+        DMABuf_oridata_stp23L.Buf,
+        userconfig_STP23L_DMABUF_LEN
+    );
+
+    /* USER CODE BEGIN StartDefaultTask */
+    for (;;)
+    {
+
+        /* 让出 CPU */
+        vTaskDelay(pdMS_TO_TICKS(100));
+    }
+    /* USER CODE END StartDefaultTask */
 }
 
 /* Private application code --------------------------------------------------*/

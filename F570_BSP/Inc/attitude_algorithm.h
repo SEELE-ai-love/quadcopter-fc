@@ -81,5 +81,8 @@ void Attitude_GetEuler(float *roll,
  */
 const char *Attitude_GetAlgorithmName(void);
 
+void Attitude_GetZero(float *roll, float *pitch, float *yaw);
+											 
+uint8_t Attitude_IsZeroReady(void);											 
 #endif
 											 

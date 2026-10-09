@@ -7,16 +7,13 @@
  *        │                     -> 填充 ps2_info.LX/LY/RX/RY
  *        │                     -> 填充 ps2_info.getKeyEvent()/getKeyState()
  *        ▼
- *   PS2_task.c       [验证层]  ← 你现在在这里
- *                              只做"读取 + 打印"，不做任何飞控决策，
- *                              目的是确认驱动层给出的数据是对的、稳定的。
+ *   PS2_task.c       [验证层]  ←这里
+ *                              PS2_task改成RTOS任务，使用队列进行信号传递
  *        ▼
- *   Control_task.c   [控制层]  ← 后期考虑
+ *   Control_task.c   [控制层]  ← 这里
  *                              读取同样的 ps2_info，把摇杆/按键翻译成
  *                              油门、姿态目标、模式切换等飞控指令。
  *
- * 本文件绝对不应该出现"切换飞行模式""解锁电机"这类逻辑——
- * 那是控制层的职责。验证层只回答一个问题："信号对不对"。
  * ============================================================================
  */
 //按键的弱函数
@@ -25,7 +22,10 @@
 #include "semphr.h"
 #include "Bsp_ps2.h"
 #include <stdio.h>
+#include "Control_task.h"
+#include "task.h"
 
+#define DEG_TO_RAD 0.017453292519943f
 /* ========== 外部资源 ========== */
 extern SemaphoreHandle_t g_xMutex_Printf;                       // printf 互斥锁
 extern USBH_StatusTypeDef USBH_HID_PS2_Decode(USBH_HandleTypeDef *phost); // 驱动层解码函数
@@ -97,13 +97,13 @@ static void PrintKeyEvent(const char *name, uint8_t bit)
 
     switch (event)
     {
-        case PS2KEYSTATE_SINGLECLICK:
+        case PS2KEYSTATE_SINGLECLICK://单击
             printf("%s\r\n", name);
             break;
-        case PS2KEYSTATE_DOUBLECLICK:
+        case PS2KEYSTATE_DOUBLECLICK://双击
             printf("double %s\r\n", name);
             break;
-        case PS2KEYSTATE_LONGCLICK:
+        case PS2KEYSTATE_LONGCLICK://长按
             printf("long %s\r\n", name);
             break;
         default:
@@ -118,6 +118,79 @@ static void PrintKeyHeld(const char *name, uint8_t bit)
     if (ps2_info.getKeyState(bit) == PS2KEY_PressDOWN)
     {
         printf("%s\r\n", name);
+    }
+}
+
+#define PS2_TASK_FREQ 20U//手柄的RTOS周期要区别于control的周期，这里设置为20hz
+static void PS2_SendControl(void)
+{
+    GamepadInput_t gamepad;//手柄数据
+    FlyControlType_t cmd;//手柄控制姿态角数据
+
+    UserGamepad.get_input(&gamepad);//获取手柄数据
+
+    cmd.source = PS2Cmd;//认证是PS2的数据
+
+    cmd.pitch = 0.0f;
+    cmd.roll = 0.0f;
+    cmd.gyroz = 0.0f;
+    cmd.height = 0.0f;
+
+    /* LY → Roll */
+    if(gamepad.LY < 64)
+    {
+        cmd.roll = 10.0f * DEG_TO_RAD;
+    }
+    else if(gamepad.LY > 190)
+    {
+        cmd.roll = -10.0f * DEG_TO_RAD;
+    }
+
+    /* LX → Pitch */
+    if(gamepad.LX < 64)
+    {
+        cmd.pitch = 10.0f * DEG_TO_RAD;
+    }
+    else if(gamepad.LX > 190)
+    {
+        cmd.pitch = -10.0f * DEG_TO_RAD;
+    }
+
+    /* RX → Yaw方向 */
+    if(gamepad.RX < 64)
+    {
+        cmd.gyroz = 1.0f;
+    }
+    else if(gamepad.RX > 190)
+    {
+        cmd.gyroz = -1.0f;
+    }
+		
+    /* RY → Height方向 */
+		 if(gamepad.RY < 64)
+    {
+        cmd.height = 0.025f;
+    }
+    else if(gamepad.RY > 190)
+    {
+        cmd.height=-0.025f;
+    }
+    WriteFlyControlQueue(cmd, 0, NULL);
+}
+void PS2_task(void *param)//手柄RTOS任务
+{
+    TickType_t pretime;
+    (void)param;
+    pretime = xTaskGetTickCount();
+
+    for(;;)
+    {
+        /* 读取手柄并发送控制指令 */
+        PS2_SendControl();
+
+        /* 20Hz，50ms执行一次 */
+        vTaskDelayUntil(&pretime,
+                        pdMS_TO_TICKS(1000U / PS2_TASK_FREQ));
     }
 }
 
