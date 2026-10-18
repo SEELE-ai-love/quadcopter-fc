@@ -22,3 +22,9 @@ MDK-ARM/usb_rebuild.log
 
 # Temporary recovery snapshot
 _recovery_20260922/
+
+# CMake / GCC local build outputs
+/build/
+/compile_commands.json
+/CMakeUserPresets.json
+/.cache/

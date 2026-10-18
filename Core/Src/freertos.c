@@ -22,7 +22,6 @@
 #include "task.h"
 #include "main.h"
 #include "cmsis_os.h"
-#include "timers.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
@@ -45,30 +44,32 @@
 #include "Bluetooth_task.h"
 #include "Bsp_buzzer.h"
 #include "PS2_task.h"
+#include "Bsp_lc307.h"
+#include "LC307_task.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
 /* USER CODE BEGIN PTD */
 //记住整个Free RTOS的框图：
 //MX_FREERTOS_Init()
-//│
-//├── 创建 Mutex 互斥锁
-//│
-//├── 创建 Semaphore 信号量
-//│
-//├── 创建 Timer Free RTOS软件定时器
-//│
+//�?
+//├── 创建 Mutex 互斥�?
+//�?
+//├── 创建 Semaphore 信号�?
+//�?
+//├── 创建 Timer Free RTOS软件定时�?
+//�?
 //├── 创建 Queue 队列
-//│ 
+//�?
 //├── 创建 Task 任务
-//│
-//└── 创建 Event Group 事件组
+//�?
+//└── 创建 Event Group 事件�?
 /* USER CODE END PTD */
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
 
-#define userconfig_RTOS_DEBUG  0//是否开启调试任务
+#define userconfig_RTOS_DEBUG  0//是否开启调试任�?
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -81,12 +82,13 @@
 /* USER CODE BEGIN 0 */
 
 //队列创建
- QueueHandle_t g_xQueueSTP23L_Ori=NULL;//激光雷达队列任务句柄
+ QueueHandle_t g_xQueueSTP23L_Ori=NULL;//激光雷达队列任务句�?
  QueueHandle_t g_xQueueBlueTooth_Ori = NULL;//蓝牙软件队列任务句柄
+ QueueHandle_t g_xQueueLC307_Ori = NULL;//光流模块队列任务句柄
  QueueHandle_t g_xQueueFlyControl; //PS手柄队列任务句柄
-//互斥锁创建
- SemaphoreHandle_t g_xMutex_Printf = NULL;//printf互斥锁句柄
-//定时器创建
+//互斥锁创�?
+ SemaphoreHandle_t g_xMutex_Printf = NULL;//printf互斥锁句�?
+//定时器创�?
  TimerHandle_t g_BuzzerSuccessTimer;
  TimerHandle_t g_BuzzerFailTimer;
  
@@ -107,14 +109,13 @@ const osThreadAttr_t defaultTask_attributes = {
 
 #if (1 ==userconfig_RTOS_DEBUG )
 void RTOSDebugTask(void *param);
-#endif //如果是1，执行调试RTOSDebugTask(void *param);
+#endif //如果�?，执行调试RTOSDebugTask(void *param);
 
 /* USER CODE END FunctionPrototypes */
 
 void StartDefaultTask(void *argument);
 
 extern void MX_USB_HOST_Init(void);
-extern UART_HandleTypeDef *DebugSerial;
 void MX_FREERTOS_Init(void); /* (MISRA C 2004 rule 8.1) */
 
 /* Hook prototypes */
@@ -128,7 +129,7 @@ void vApplicationMallocFailedHook(void);
 /* Functions needed when configGENERATE_RUN_TIME_STATS is on */
 __weak void configureTimerForRunTimeStats(void)
 {
-  //定时器TIM6用来给 getRunTimeCounterValue（）
+  //定时器TIM6用来�?getRunTimeCounterValue（）
 	HAL_TIM_Base_Start(&htim6);
 }
 
@@ -138,14 +139,14 @@ __weak unsigned long getRunTimeCounterValue(void)
 	static uint16_t lasttime = 0;
 	static uint16_t nowtime = 0;
 	
-	nowtime = TIM6->CNT; //获得当前计数值
+	nowtime = TIM6->CNT; //获得当前计数�?
 	
 	//如果本次计数值小于上次计数值，说明发生了定时器计数溢出
 	if( nowtime < lasttime )
 	{
 		time += (nowtime + 0xffff - lasttime); //溢出后的时间增量
 	}		
-	else time += ( nowtime - lasttime ) ; //未发生溢出，增量为本次时间-上次时间
+	else time += ( nowtime - lasttime ) ; //未发生溢出，增量为本次时�?上次时间
 	
 	lasttime = nowtime;
 	
@@ -175,6 +176,7 @@ void vApplicationIdleHook( void )
 
 /* USER CODE BEGIN 4 */
 
+extern UART_HandleTypeDef *DebugSerial;
 static void DebugUart_RawWrite(const char *text)
 {
   if ((DebugSerial != NULL) && (text != NULL))
@@ -243,7 +245,7 @@ void MX_FREERTOS_Init(void) {
   /* USER CODE BEGIN RTOS_MUTEX */
   /* add mutexes, ... */
 	
-	 // ========== 在这里创建 printf 互斥锁 ==========
+	 // ========== 在这里创�?printf 互斥�?==========
   g_xMutex_Printf = xSemaphoreCreateMutex();
   if(g_xMutex_Printf == NULL)
   {
@@ -257,36 +259,46 @@ void MX_FREERTOS_Init(void) {
 
   /* USER CODE BEGIN RTOS_TIMERS */
   /* start timers, add new ones, ... */
-  // ========== 在这里创建 RTOS定时器事件 ==========
+	
+  // ========== 在这里创�?RTOS定时器事�?==========
 	g_BuzzerSuccessTimer = xTimerCreate(
-    "BuzzerOK",                  // 定时器名字
-    pdMS_TO_TICKS(10),           // 定时时间：10ms
-    pdFALSE,                     // 不自动重复，单次定时器
+    "BuzzerOK",                  // 定时器名�?
+    pdMS_TO_TICKS(10),           // 定时时间�?0ms
+    pdFALSE,                     // 不自动重复，单次定时�?
     NULL,                        // Timer ID
-    Timer_SuccessCallback        // 时间到了以后调用的回调
+    Timer_SuccessCallback        // 时间到了以后调用的回�?
 );
 
-/* 失败提示定时器 */
+/* 失败提示定时�?*/
 g_BuzzerFailTimer = xTimerCreate(
-    "BuzzerERR",                 // 定时器名字
-    pdMS_TO_TICKS(10),            // 定时时间：10ms
-    pdFALSE,                      // 单次定时器
+    "BuzzerERR",                 // 定时器名�?
+    pdMS_TO_TICKS(10),            // 定时时间�?0ms
+    pdFALSE,                      // 单次定时�?
     NULL,                         // Timer ID
-    Timer_FailCallback            // 时间到了以后调用的回调
+    Timer_FailCallback            // 时间到了以后调用的回�?
 );
   /* USER CODE END RTOS_TIMERS */
 
   /* USER CODE BEGIN RTOS_QUEUES */
   /* add queues, ... */
+		
+  // ========== 在这里创�?RTOS队列 ==========
+	//如果内存不足创建失败，返回NULL,第一个参数是队列的项数，第二个参数是每一项占用多少的字节，包含自己创立的DMA结构体的数据项和缓冲�?
 	//STP23L模块队列模块
 	g_xQueueSTP23L_Ori = xQueueCreate(3, sizeof(OriData_STP23L_t));
-  if (g_xQueueSTP23L_Ori == NULL)//如果内存不足创建失败，返回NULL
+  if (g_xQueueSTP23L_Ori == NULL)
   {
     Error_Handler();
   }
 	//蓝牙软件队列模块
 	g_xQueueBlueTooth_Ori = xQueueCreate(128, sizeof(uint8_t));
   if(g_xQueueBlueTooth_Ori == NULL)
+  {
+    Error_Handler();
+  }
+	//光流模块队列模块
+	g_xQueueLC307_Ori = xQueueCreate(3, sizeof(DMABuf_oridata_LC307_t));
+  if(g_xQueueLC307_Ori == NULL)
   {
     Error_Handler();
   }
@@ -301,10 +313,6 @@ g_BuzzerFailTimer = xTimerCreate(
   /* Create the thread(s) */
   /* creation of defaultTask */
   defaultTaskHandle = osThreadNew(StartDefaultTask, NULL, &defaultTask_attributes);
-  if (defaultTaskHandle == NULL)
-  {
-    Error_Handler();
-  }
 
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
@@ -319,6 +327,8 @@ g_BuzzerFailTimer = xTimerCreate(
   /* USER CODE END RTOS_THREADS */
 
   /* USER CODE BEGIN RTOS_EVENTS */
+		
+  // ========== 在这里创�?RTOS任务 ==========
 	if (xTaskCreate(attitude_task, "Attitude", 1024, NULL, 3, NULL) != pdPASS)
 	{
 	  Error_Handler();
@@ -339,14 +349,18 @@ g_BuzzerFailTimer = xTimerCreate(
 	{
 		 Error_Handler();
 	}
-	if(xTaskCreate(Bluetooth_task,"BTAPPTask",256,NULL,1,NULL) !=pdPASS)//xTaskCreate()第一个参数必须是void Bluetooth_task(void *param)这样的;
+	if(xTaskCreate(Bluetooth_task,"BTAPPTask",256,NULL,1,NULL) !=pdPASS)//xTaskCreate()第一个参数必须是void Bluetooth_task(void *param)这样�?
 	{
 		 Error_Handler();
 	}
 	if(xTaskCreate(PS2_task, "PS2", 256, NULL, 2, NULL) != pdPASS)
-{
+  {
     Error_Handler();
-}
+  }
+	if(xTaskCreate(LC307_task,"LC307",1024,NULL,2,NULL) !=pdPASS)//xTaskCreate()第一个参数必须是void LC307_task(void *param)这样�?
+	{
+		 Error_Handler();
+	}
   /* add events, ... */
   /* USER CODE END RTOS_EVENTS */
 
@@ -361,24 +375,39 @@ g_BuzzerFailTimer = xTimerCreate(
 /* USER CODE END Header_StartDefaultTask */
 void StartDefaultTask(void *argument)
 {
-    /* 初始化 USB Host */
-    MX_USB_HOST_Init();
+  /* init code for USB_HOST */
+  MX_USB_HOST_Init();
+  /* USER CODE BEGIN StartDefaultTask */
+	/*
+ * Normal �?Circular 都需要首次启�?DMA�?
+ * 本工程把首次启动放在默认任务中�?
+ * Normal 模式接收结束后，还需要在 UART callback 中重新启动�?
+ */
+//补充：HAL库里面的HAL_UARTEx_ReceiveToIdle_DMA参数�?串口+DMA 搬来的原始字节存放地址+DMA缓冲�?
+//第二个参数：DMABuf_oridata_LC307.Buf
+//                         �?
+//                         └── 驱动里定义的 uint8_t 接收数组
 
-    /* 启动 STP23L 激光测距：UART5 + DMA + 空闲中断 */
-    HAL_UARTEx_ReceiveToIdle_DMA(
-        &huart5,
-        DMABuf_oridata_stp23L.Buf,
-        userconfig_STP23L_DMABUF_LEN
-    );
-
-    /* USER CODE BEGIN StartDefaultTask */
+//第三个参数：userconfig_LC307_DMABUF_LEN
+//                         �?
+//                         └── 驱动头文件里定义的容�?50
+	//启用STP23L的DMA搬运
+	HAL_UARTEx_ReceiveToIdle_DMA(&huart5,DMABuf_oridata_stp23L.Buf,userconfig_STP23L_DMABUF_LEN);
+	//启用LC307的DMA搬运
+	//����ֻ����״���������ʵ��DMA��������LC307����
+	if(g_lc307_config_ok != 0U)
+	{
+		taskENTER_CRITICAL();
+		g_lc307_rx_requests |= LC307_RX_REQUEST_START;
+		taskEXIT_CRITICAL();
+	}
     for (;;)
     {
 
         /* 让出 CPU */
         vTaskDelay(pdMS_TO_TICKS(100));
     }
-    /* USER CODE END StartDefaultTask */
+  /* USER CODE END StartDefaultTask */
 }
 
 /* Private application code --------------------------------------------------*/

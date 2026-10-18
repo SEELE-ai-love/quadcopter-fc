@@ -67,7 +67,7 @@ void power_task(void *param)
         }
 					if(xSemaphoreTake(g_xMutex_Printf, portMAX_DELAY) == pdTRUE)
         {
-     // printf("VBAT: %.2fV, CURR: %.2fA\r\n", voltage, current);//打印电压与电流
+       //printf("VBAT: %.2fV, CURR: %.2fA\r\n", voltage, current);//打印电压与电流
 		   xSemaphoreGive(g_xMutex_Printf); 
         vTaskDelayUntil(&preTime, pdMS_TO_TICKS(1000.0f / POWER_TASK_FREQ));
         }

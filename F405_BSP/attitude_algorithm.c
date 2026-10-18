@@ -195,35 +195,35 @@ void Attitude_Update(float gx,
      * Mahony
      * ========================================================
      */
-   if (g_attitude_algorithm == ATTITUDE_ALGO_MAHONY)
-{
-    Mahony_Update(gx, gy, gz,
-                  ax, ay, az,
-                  dt);
+    if (g_attitude_algorithm == ATTITUDE_ALGO_MAHONY)
+    {
+        Mahony_Update(gx, gy, gz,
+                      ax, ay, az,
+                      dt);
 
-    Quaternion_t temp_q = Mahony_GetQuaternion();
+        Quaternion_t temp_q = Mahony_GetQuaternion();
 
-    Attitude_QuaternionToEuler(&temp_q);
-}
-else
-{
-    EKF_Update(gx, gy, gz,
-               ax, ay, az,
-               dt,
-               &g_ekf);
+        Attitude_QuaternionToEuler(&temp_q);
+    }
+    else
+    {
+        EKF_Update(gx, gy, gz,
+                   ax, ay, az,
+                   dt,
+                   &g_ekf);
 
-    Attitude_QuaternionToEuler(&g_ekf.q);
-}
+        Attitude_QuaternionToEuler(&g_ekf.q);
+    }
 
-/* 原始姿态角已经算完 */
+    /* 原始姿态角已经算完 */
 
-if (!attitude_zero_ready)
-{
-    Attitude_UpdateZero();
-}
+    if (!attitude_zero_ready)
+    {
+        Attitude_UpdateZero();
+    }
 
-/* 零点采样完成后，对当前姿态进行补偿 */
-Attitude_ApplyZero();
+    /* 零点采样完成后，对当前姿态进行补偿 */
+    Attitude_ApplyZero();
 
 }
 
@@ -240,9 +240,9 @@ static void Attitude_UpdateZero(void)
     /* 开始正式采样 */
     if (attitude_zero_sample_count < ATTITUDE_ZERO_SAMPLE_NUM)
     {
-attitude_roll_sum  += g_raw_roll;
-attitude_pitch_sum += g_raw_pitch;
-attitude_yaw_sum   += g_raw_yaw;
+        attitude_roll_sum  += g_raw_roll;
+        attitude_pitch_sum += g_raw_pitch;
+        attitude_yaw_sum   += g_raw_yaw;
 
         attitude_zero_sample_count++;
 

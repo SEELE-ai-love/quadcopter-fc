@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="420" viewBox="0 0 1200 420" role="img" aria-labelledby="title desc">
+<title id="title">F405 四旋翼飞控</title>
+<desc id="desc">姿态估计、实时数据链与控制计算的软件工程展示封面。</desc>
+<defs>
+ <linearGradient id="bg" x2="1" y2="1"><stop stop-color="#0b1426"/><stop offset="1" stop-color="#123c4a"/></linearGradient>
+ <pattern id="grid" width="36" height="36" patternUnits="userSpaceOnUse"><path d="M 36 0 L 0 0 0 36" fill="none" stroke="#6eb5c4" stroke-opacity=".08"/></pattern>
+</defs>
+<rect width="1200" height="420" rx="24" fill="url(#bg)"/>
+<rect width="1200" height="420" rx="24" fill="url(#grid)"/>
+<circle cx="1095" cy="50" r="240" fill="none" stroke="#3cd0bd" stroke-opacity=".10" stroke-width="52"/>
+<g font-family="Microsoft YaHei, PingFang SC, Noto Sans CJK SC, sans-serif">
+ <rect x="56" y="51" width="8" height="30" rx="4" fill="#5eead4"/>
+ <text x="82" y="74" font-size="24" letter-spacing="3" fill="#a5f3e7">STM32 · FREERTOS · C99</text>
+ <text x="56" y="163" font-size="66" font-weight="700" fill="#f1f5f9">F405 四旋翼飞控</text>
+ <text x="60" y="215" font-size="29" fill="#c3d5e3">姿态估计 / 实时数据链 / 多环控制</text>
+ <g transform="translate(56 276)">
+  <rect width="330" height="84" rx="14" fill="#172e43" stroke="#35536a"/>
+  <text x="22" y="34" font-size="18" fill="#70d7c4">01 / 姿态估计</text>
+  <text x="22" y="64" font-size="24" fill="#f1f5f9">四元数 EKF · Mahony</text>
+ </g>
+ <g transform="translate(405 276)">
+  <rect width="330" height="84" rx="14" fill="#172e43" stroke="#35536a"/>
+  <text x="22" y="34" font-size="18" fill="#70d7c4">02 / 实时数据链</text>
+  <text x="22" y="64" font-size="24" fill="#f1f5f9">时间戳 · 队列 · FIFO</text>
+ </g>
+ <g transform="translate(754 276)">
+  <rect width="390" height="84" rx="14" fill="#172e43" stroke="#35536a"/>
+  <text x="22" y="34" font-size="18" fill="#70d7c4">03 / 控制计算</text>
+  <text x="22" y="64" font-size="24" fill="#f1f5f9">位置 PD · 串级 PID · 混控</text>
+ </g>
+</g>
+</svg>

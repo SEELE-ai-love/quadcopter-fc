@@ -13,6 +13,11 @@
 #define ACCEL_TRUST_LOW 0.85f
 #define ACCEL_TRUST_HIGH 11.1f
 
+/* Static accel bias from bench sample: X=-262.18, Y=-29.64, Z bias=-26.10 mm/s^2 */
+#define ACCEL_BIAS_X_MPS2  (-0.2590526f)
+#define ACCEL_BIAS_Y_MPS2  (-0.0162105f) 
+#define ACCEL_BIAS_Z_MPS2  (-0.0261045f)
+
 //定义全局变量
 IMU_DATA_T ZreoPoint ={0};//传感器自身固定零偏
 
@@ -84,6 +89,10 @@ uint8_t ICM20948_Update(IMU_DATA_T*data,I2C_HandleTypeDef *hi2c)
     data->accel.x *= 0.00059814453125f;
     data->accel.y *= 0.00059814453125f;
     data->accel.z *= 0.00059814453125f;
+
+    data->accel.x -= ACCEL_BIAS_X_MPS2;
+    data->accel.y -= ACCEL_BIAS_Y_MPS2;
+    data->accel.z -= ACCEL_BIAS_Z_MPS2;
 
     data->gyro.x =(short)(buf[6]<<8)|buf[7];
     data->gyro.y =(short)(buf[8]<<8)|buf[9];

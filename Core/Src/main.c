@@ -33,6 +33,8 @@
 #include <stdio.h>
 #include "FreeRTOS.h"
 #include "Bsp_stp23L.h"
+#include "Bsp_lc307.h"
+
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -61,6 +63,8 @@ uint8_t uart1_recv;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
+//对于光流模块需要在mian里面初始化才可以使用，STP23l是上电就测数据所以不用
+
 void SystemClock_Config(void);
 void MX_FREERTOS_Init(void);
 /* USER CODE BEGIN PFP */
@@ -103,22 +107,28 @@ int main(void)
   MX_GPIO_Init();
   MX_DMA_Init();
   MX_USART1_UART_Init();
+  (void)HAL_UART_Transmit(&huart1, (const uint8_t *)"BOOT:UART1\r\n", 12U, 100U);
   MX_UART4_Init();
   MX_UART5_Init();
+  MX_USART3_UART_Init();
+  (void)HAL_UART_Transmit(&huart1, (const uint8_t *)"BOOT:PERIPH\r\n", 13U, 100U);
   MX_TIM6_Init();
   MX_TIM8_Init();
   MX_ADC1_Init();
   MX_I2C1_Init();
   /* USER CODE BEGIN 2 */
+	
 HAL_UART_Receive_IT(&huart1,&uart1_recv,1);
 HAL_UART_Receive_IT(&huart4,&uart4_recv,1);
+  (void)HAL_UART_Transmit(&huart1, (const uint8_t *)"BOOT:LC307\r\n", 12U, 100U);
 
 //���IIC�Ƿ�ɹ�����
 //uint8_t iic_recv=0xff;
 //HAL_I2C_Mem_Read(&hi2c1,0x68<<1,0x00,I2C_MEMADD_SIZE_8BIT,&iic_recv,1,500);
 //printf("0x%2X\r\n",iic_recv);
   /* USER CODE END 2 */
-
+  g_lc307_config_ok = (Opf_LC307_Init() == 0U) ? 1U : 0U;
+  (void)HAL_UART_Transmit(&huart1, (const uint8_t *)"BOOT:RTOS\r\n", 11U, 100U);
   /* Init scheduler */
   osKernelInitialize();  /* Call init function for freertos objects (in cmsis_os2.c) */
   MX_FREERTOS_Init();
@@ -246,6 +256,10 @@ void Error_Handler(void)
 {
   /* USER CODE BEGIN Error_Handler_Debug */
   /* User can add his own implementation to report the HAL error return state */
+  if (huart1.Instance != NULL)
+  {
+    (void)HAL_UART_Transmit(&huart1, (const uint8_t *)"ERROR\r\n", 7U, 100U);
+  }
   __disable_irq();
   while (1)
   {

@@ -98,18 +98,15 @@ void MX_USB_HOST_Init(void)
   /* Init host Library, add supported class and start the library. */
   if (USBH_Init(&hUsbHostFS, USBH_UserProcess, HOST_FS) != USBH_OK)
   {
-    Appli_state = APPLICATION_DISCONNECT;
-    return;
+    Error_Handler();
   }
   if (USBH_RegisterClass(&hUsbHostFS, USBH_HID_CLASS) != USBH_OK)
   {
-    Appli_state = APPLICATION_DISCONNECT;
-    return;
+    Error_Handler();
   }
   if (USBH_Start(&hUsbHostFS) != USBH_OK)
   {
-    Appli_state = APPLICATION_DISCONNECT;
-    return;
+    Error_Handler();
   }
   /* USER CODE BEGIN USB_HOST_Init_PostTreatment */
 

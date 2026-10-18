@@ -22,7 +22,9 @@ void show_task(void *param)
 
     char showbuffer[256];
 
+    TickType_t pretime;
     (void)param;
+    pretime = xTaskGetTickCount();
 
     while (1)
     {

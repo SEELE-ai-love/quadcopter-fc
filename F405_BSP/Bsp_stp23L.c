@@ -37,7 +37,7 @@ typedef struct{
 
 static STP23L_OneFrame_t stp23L_frame;               //保存1帧stp23L数据，用来数据解析
 static const uint8_t stp23L_BufLen = sizeof(stp23L_frame); //原始数据的长度
-static uint8_t stp23L_buf[ stp23L_BufLen ] ;         //存储原始数据的数组
+static uint8_t stp23L_buf[ sizeof(stp23L_frame) ] ;         //存储原始数据的数组
 static uint8_t stp23L_counts = 0;                    //接收数据的计数值
 
 //获取距离信息

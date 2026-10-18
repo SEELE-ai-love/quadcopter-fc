@@ -1,5 +1,5 @@
 // ============================================================
-// Áî±Âçï‰ªªÂä°ËÄ¶ÂêàËß£ËÄ¶ÊàêÂ§ö‰ªªÂä° + FreeRTOS ÂΩ¢Âºè
+// Áî±Âçï‰ªªÂä°ËÄ¶ÂêàËß£ËÄ¶ÊàêÂ§ö‰ªªÂä?+ FreeRTOS ÂΩ¢Âºè
 // ============================================================
 
 #include "attitude_task.h"
@@ -12,13 +12,14 @@
 
 #include "Bsp_imu.h"
 #include "Bsp_iic.h"
+#include "usart.h"
 #include "icm20948_reg.h"
 #include "attitude_algorithm.h"
 #include "pid.h"
 #include "math.h"
 #define GYRO_CALIBRATE_NUM 2000
 /* ============================================================
- * ÂÖ±‰∫´ÂßøÊÄÅÊï∞ÊçÆ
+ * ÂÖ±‰∫´ÂßøÊÄÅÊï∞Êç?
  * ============================================================ */
 static float g_latest_roll  = 0.0f;
 static float g_latest_pitch = 0.0f;
@@ -28,12 +29,97 @@ static float g_latest_gx = 0.0f;
 static float g_latest_gy = 0.0f;
 static float g_latest_gz = 0.0f;
 
+static float g_latest_ax = 0.0f;
+static float g_latest_ay = 0.0f;
+static float g_latest_az = 0.0f;
+static TickType_t g_latest_sample_tick = 0U;
+static uint32_t g_latest_sequence = 0U;
+
+// IMU_FIFO BEGIN£∫πÃ∂® ˝◊È£¨≤ª¡ÌÕ‚…Í«ÎRTOS∂—£¨“≤≤ª∏ƒ±‰œ÷‘⁄200Hz≤…—˘
+static AttitudeSnapshot_t g_attitude_fifo[ATTITUDE_FIFO_CAPACITY];
+static uint16_t g_attitude_fifo_read = 0U;
+static uint16_t g_attitude_fifo_write = 0U;
+static AttitudeFifoStats_t g_attitude_fifo_stats = {0};
+
+//’‚¿Ô÷ªƒ‹‘⁄∑¢≤ºøÏ’’µƒ∂Ã¡ŸΩÁ«¯ƒ⁄µ˜”√£¨≤ª“™‘ŸÃ◊“ª≤„¡ŸΩÁ«¯
+static void Attitude_FifoPushLocked(void)
+{
+    AttitudeSnapshot_t *sample = &g_attitude_fifo[g_attitude_fifo_write];
+
+    if(g_attitude_fifo_stats.pending == ATTITUDE_FIFO_CAPACITY)
+    {
+        //¬˙¡À±£¡ÙΩœ–¬µƒ ˝æ›£¨∂™µÙ◊Ó¿œ“ª÷°£ªœ˚∑—’ﬂªπª·ºÏ≤Èsequence «∑Ò¡¨–¯
+        g_attitude_fifo_read = (uint16_t)((g_attitude_fifo_read+1U) % ATTITUDE_FIFO_CAPACITY);
+        g_attitude_fifo_stats.overflow++;
+    }
+    else
+    {
+        g_attitude_fifo_stats.pending++;
+    }
+
+    sample->roll = g_latest_roll;
+    sample->pitch = g_latest_pitch;
+    sample->yaw = g_latest_yaw;
+    sample->gx = g_latest_gx;
+    sample->gy = g_latest_gy;
+    sample->gz = g_latest_gz;
+    sample->ax = g_latest_ax;
+    sample->ay = g_latest_ay;
+    sample->az = g_latest_az;
+    sample->sample_tick = g_latest_sample_tick;
+    sample->sequence = g_latest_sequence;
+
+    g_attitude_fifo_write = (uint16_t)((g_attitude_fifo_write+1U) % ATTITUDE_FIFO_CAPACITY);
+    g_attitude_fifo_stats.pushed++;
+    if(g_attitude_fifo_stats.pending > g_attitude_fifo_stats.high_water)
+    {
+        g_attitude_fifo_stats.high_water = g_attitude_fifo_stats.pending;
+    }
+}
+
+uint8_t Attitude_FifoPop(AttitudeSnapshot_t *out)
+{
+    uint8_t available = 0U;
+
+    if(out == NULL)
+    {
+        return 0U;
+    }
+
+    //√ø¥Œ÷ª∏¥÷∆“ª÷°£¨≤ª‘⁄¡ŸΩÁ«¯¿ÔΩ‚À„°¢ª˝∑÷ªÚ’ﬂ¥Ú”°
+    taskENTER_CRITICAL();
+    if(g_attitude_fifo_stats.pending != 0U)
+    {
+        *out = g_attitude_fifo[g_attitude_fifo_read];
+        g_attitude_fifo_read = (uint16_t)((g_attitude_fifo_read+1U) % ATTITUDE_FIFO_CAPACITY);
+        g_attitude_fifo_stats.pending--;
+        g_attitude_fifo_stats.popped++;
+        available = 1U;
+    }
+    taskEXIT_CRITICAL();
+
+    return available;
+}
+
+void Attitude_FifoGetStats(AttitudeFifoStats_t *out)
+{
+    if(out == NULL)
+    {
+        return;
+    }
+
+    taskENTER_CRITICAL();
+    *out = g_attitude_fifo_stats;
+    taskEXIT_CRITICAL();
+}
+// IMU_FIFO END
+
 float gyro_sum_x = 0.0f;
 float gyro_sum_y = 0.0f;
 float gyro_sum_z = 0.0f;
 
 /* ============================================================
- * printf ‰∫íÊñ•ÈîÅ
+ * printf ‰∫íÊñ•Èî?
  * ============================================================ */
 extern SemaphoreHandle_t g_xMutex_Printf;
 
@@ -41,6 +127,29 @@ extern SemaphoreHandle_t g_xMutex_Printf;
 /* ============================================================
  * Ë∑®‰ªªÂä°Êé•Âè£ÔºöÂßøÊÄÅËßí
  * ============================================================ */
+uint8_t Attitude_GetSnapshot(AttitudeSnapshot_t *out)
+{
+    if(out == NULL)
+    {
+        return 0U;
+    }
+    //’‚¿Ô÷ª∏¥÷∆“ª¬÷IMUµƒ ˝æ›£¨≤ª‘⁄¡ŸΩÁ«¯¿Ô√Êº∆À„
+    taskENTER_CRITICAL();
+    out->roll = g_latest_roll;
+    out->pitch = g_latest_pitch;
+    out->yaw = g_latest_yaw;
+    out->gx = g_latest_gx;
+    out->gy = g_latest_gy;
+    out->gz = g_latest_gz;
+    out->ax = g_latest_ax;
+    out->ay = g_latest_ay;
+    out->az = g_latest_az;
+    out->sample_tick = g_latest_sample_tick;
+    out->sequence = g_latest_sequence;
+    taskEXIT_CRITICAL();
+    return (out->sequence != 0U) ? 1U : 0U;
+}
+
 void Attitude_GetLatest(float *roll,
                         float *pitch,
                         float *yaw)
@@ -71,9 +180,22 @@ void Attitude_GetGyro(float *gx,
     taskEXIT_CRITICAL();
 }
 
+void Attitude_GetAccel(float *ax,
+                       float *ay,
+                       float *az)
+{
+    taskENTER_CRITICAL();
+
+    *ax = g_latest_ax;
+    *ay = g_latest_ay;
+    *az = g_latest_az;
+
+    taskEXIT_CRITICAL();
+}
+
 
 /* ============================================================
- * ÂßøÊÄÅ‰ªªÂä°
+ * ÂßøÊÄÅ‰ªªÂä?
  *
  * 200 Hz
  * dt = 0.005s
@@ -97,6 +219,7 @@ void attitude_task(void *param)
     uint32_t print_divider = 0U;
 
     (void)param;
+    (void)HAL_UART_Transmit(&huart1, (const uint8_t *)"BOOT:ATT_TASK\r\n", 15U, 100U);
 
 
     /* ========================================================
@@ -109,12 +232,14 @@ void attitude_task(void *param)
 
 
     /* ========================================================
-     * ÂàùÂßãÂåñ ICM20948
+     * ÂàùÂßãÂå?ICM20948
      * ======================================================== */
     while (!ICM20948_Init(&hi2c1))
     {
+        (void)HAL_UART_Transmit(&huart1, (const uint8_t *)"BOOT:IMU_WAIT\r\n", 15U, 100U);
         vTaskDelay(pdMS_TO_TICKS(200));
     }
+    (void)HAL_UART_Transmit(&huart1, (const uint8_t *)"BOOT:IMU_OK\r\n", 13U, 100U);
 
 
     /* ========================================================
@@ -124,7 +249,7 @@ void attitude_task(void *param)
 
 
     /* ========================================================
-     * ‰∏ªÂæ™ÁéØ
+     * ‰∏ªÂæ™Áé?
      * ======================================================== */
     for (;;)
     {
@@ -136,11 +261,14 @@ void attitude_task(void *param)
          * ==================================================== */
         if (ICM20948_Update(&imu, &hi2c1))
         {
+            // IMU_FIFO£∫º«¬º∂¡ ˝ÕÍ≥… ±º‰£¨≤ªƒ‹∞—≥ˆFIFOµƒ ±º‰µ±≥…≤…—˘ ±º‰
+            TickType_t sample_tick = xTaskGetTickCount();
+
             /* =================================================
-             * ÂßøÊÄÅËß£ÁÆó
+             * ÂßøÊÄÅËß£ÁÆ?
              *
              * gyroÔºörad/s
-             * accelÔºöÂΩìÂâç Bsp_imu.c ÁöÑÂçï‰Ωç
+             * accelÔºöÂΩìÂâ?Bsp_imu.c ÁöÑÂçï‰Ω?
              * ================================================= */
             Attitude_Update(imu.gyro.x,
                             imu.gyro.y,
@@ -154,13 +282,13 @@ void attitude_task(void *param)
             /* =================================================
              * Ëé∑ÂèñÊúÄÁªàÂßøÊÄÅËßí
              *
-             * ËøôÈáåÂ∑≤ÁªèÁªèËøáÔºö
+             * ËøôÈáåÂ∑≤ÁªèÁªèËøáÔº?
              *
-             * ÂéüÂßãÂßøÊÄÅ
-             *     ‚Üì
+             * ÂéüÂßãÂßøÊÄ?
+             *     ‚Ü?
              * AttitudeZero
-             *     ‚Üì
-             * ÊúÄÁªàÂßøÊÄÅ
+             *     ‚Ü?
+             * ÊúÄÁªàÂßøÊÄ?
              * ================================================= */
             Attitude_GetEuler(&roll,
                               &pitch,
@@ -178,9 +306,10 @@ void attitude_task(void *param)
             /* =================================================
              * ÂèëÂ∏ÉÊúÄÁªàÂßøÊÄÅÁªô control_task
              *
-             * Ê≥®ÊÑèÔºö
+             * Ê≥®ÊÑèÔº?
              * ËøôÈáå‰øùÁïô‰Ω†ÂéüÊù•ÁöÑ Roll / Pitch ÊñπÂêëÂÆö‰πâ
              * ================================================= */
+            //≥…π¶∂¡ ˝∫Û°¢∑¢≤º«∞µƒ»Ìº˛ ±º‰±Íº«£¨≤ª¥˙±Ì–æ∆¨”≤º˛Õ¨≤Ω
             taskENTER_CRITICAL();
 
             g_latest_roll  = roll;
@@ -195,6 +324,14 @@ void attitude_task(void *param)
             g_latest_gy = imu.gyro.y;
             g_latest_gz = imu.gyro.z;
 
+            g_latest_ax = imu.accel.x;
+            g_latest_ay = imu.accel.y;
+            g_latest_az = imu.accel.z;
+            g_latest_sample_tick = sample_tick;
+            g_latest_sequence++;
+            // IMU_FIFO£∫Õ¨“ª¬÷øÏ’’∑≈»ÎFIFO£¨’‚¿Ô÷ª∏¥÷∆£¨≤ª◊ˆº∆À„
+            Attitude_FifoPushLocked();
+
             taskEXIT_CRITICAL();
 
 
@@ -202,9 +339,9 @@ void attitude_task(void *param)
              * ‰∏≤Âè£ÊâìÂç∞
              *
              * 200Hz / 20 = 10Hz
-             * ÊØèÁßíÊâìÂç∞10Ê¨°
+             * ÊØèÁßíÊâìÂç∞10Ê¨?
              *
-             * %.1fÔºö
+             * %.1fÔº?
              * ‰øùÁïô 0.1¬∞
              * ================================================= */
             print_divider++;
@@ -214,15 +351,15 @@ void attitude_task(void *param)
              * È™åËØÅÊúÄÂü∫Êú¨ÁöÑÂçï‰ΩçÊòØÂê¶Ê≠£Á°ÆÔºå‰∏≤Á∫ßPIDÁªü‰∏ÄÊàêÂºßÂ∫¶Âà∂
              * gyroÁöÑrad\sÂíådpsÊòØÂê¶ÊàêÂäüÁªü‰∏Ä
              * accelÂä†ÈÄüÂ∫¶ÊòØÂê¶ÊòØm\s¬≤
-             * ACC_NORM ‚âà 9.8 m/s¬≤ÔºåËØ¥ÂëΩÂä†ÈÄüÂ∫¶ÁöÑÁº©ÊîæÊ≤°ÊúâÈóÆÈ¢ò
+             * ACC_NORM ‚â?9.8 m/s¬≤ÔºåËØ¥ÂëΩÂä†ÈÄüÂ∫¶ÁöÑÁº©ÊîæÊ≤°ÊúâÈóÆÈ¢?
              * 
        * ================================================= */
-//static uint8_t print_cnt = 0;
+// static uint8_t print_cnt = 0;
 
-//print_cnt++;
+// print_cnt++;
 
-//if(print_cnt >= 40)   // 200Hz / 40 = 5Hz
-//{
+// if(print_cnt >= 40)   // 200Hz / 40 = 5Hz
+// {
 //    print_cnt = 0;
 
 //    float gyro_x_dps = imu.gyro.x * 57.2957795f;
@@ -249,33 +386,32 @@ void attitude_task(void *param)
 //           gyro_x_dps,
 //           gyro_y_dps,
 //           gyro_z_dps);
-//}
-            if (print_divider >=
-                (ATTITUDE_TASK_FREQ / 10U))
-            {
-                print_divider = 0U;
+// }
+        //    if (print_divider >=
+        //        (ATTITUDE_TASK_FREQ / 10U))
+        //    {
+        //        print_divider = 0U;
 
+        //        if (xSemaphoreTake(g_xMutex_Printf,
+        //                           portMAX_DELAY) == pdTRUE)
+        //        {
+        //            printf("Angle: R=%+.3f P=%+.3f Y=%+.3f | "
+        //                   "gyro: x=%+.3f y=%+.3f z=%+.3f | "
+        //                   "READY=%d\r\n",
+        //                   roll,
+        //                   pitch,
+        //                   yaw,
+        //                   imu.gyro.x,
+        //                   imu.gyro.y,
+        //                   imu.gyro.z,
+        //                   Attitude_IsZeroReady());
 
-                if (xSemaphoreTake(g_xMutex_Printf,
-                                   portMAX_DELAY) == pdTRUE)
-                {
-//                    printf("Angle: R=%+.3f P=%+.3f Y=%+.3f | "
-//                           "gyro: x=%+.3f y=%+.3f z=%+.3f | "
-//                           "READY=%d\r\n",
-//                           roll,
-//                           pitch,
-//                           yaw,
-//                           imu.gyro.x,
-//                           imu.gyro.y,
-//                           imu.gyro.z,
-//                           Attitude_IsZeroReady());
-									
-									
-
-                    xSemaphoreGive(g_xMutex_Printf);
-                }
-            }
+        //            xSemaphoreGive(g_xMutex_Printf);
+        //        }
+        //    }
         }
+        //IMU∂¡»° ß∞‹“≤“™»√≥ˆCPU£¨≤ªƒ‹∞—∏ﬂ”≈œ»º∂»ŒŒÒ≈‹≥…À¿—≠ª∑
+		//ÊØè‰∏ÄËΩÆÈÉΩË¶ÅËµ∞Âà∞‰∏ãÈù¢ÁöÑÂª∂Êó∂Ôºå‰∏çËÉΩÂú®ËøôÈáåÊèêÂâçÁªìÊùüforÂæ™ÁéØ
 
 
         /* ====================================================
@@ -287,4 +423,4 @@ void attitude_task(void *param)
                         (float)ATTITUDE_TASK_FREQ));
     }
 }
-
+// }

@@ -336,7 +336,7 @@
               <MiscControls></MiscControls>
               <Define>USE_HAL_DRIVER,STM32F405xx</Define>
               <Undefine></Undefine>
-              <IncludePath>../Core/Inc;../Drivers/STM32F4xx_HAL_Driver/Inc;../Drivers/STM32F4xx_HAL_Driver/Inc/Legacy;../Drivers/CMSIS/Device/ST/STM32F4xx/Include;../Drivers/CMSIS/Include;../Middlewares/Third_Party/FreeRTOS/Source/include;../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2;../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM4F;../F570_BSP;../F570_APP;../F570_BSP/Inc;../USB_HOST/App;../USB_HOST/Target;../Middlewares/ST/STM32_USB_Host_Library/Core/Inc;../Middlewares/ST/STM32_USB_Host_Library/Class/HID/Inc</IncludePath>
+              <IncludePath>../Core/Inc;../Drivers/STM32F4xx_HAL_Driver/Inc;../Drivers/STM32F4xx_HAL_Driver/Inc/Legacy;../Drivers/CMSIS/Device/ST/STM32F4xx/Include;../Drivers/CMSIS/Include;../Middlewares/Third_Party/FreeRTOS/Source/include;../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2;../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM4F;../F405_BSP;../F405_APP;../F405_BSP/Inc;../USB_HOST/App;../USB_HOST/Target;../Middlewares/ST/STM32_USB_Host_Library/Core/Inc;../Middlewares/ST/STM32_USB_Host_Library/Class/HID/Inc</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -1846,137 +1846,152 @@
           </Files>
         </Group>
         <Group>
-          <GroupName>F570_BSP</GroupName>
+          <GroupName>F405_BSP</GroupName>
           <Files>
             <File>
               <FileName>Bsp_adc.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\F570_BSP\Bsp_adc.c</FilePath>
+              <FilePath>..\F405_BSP\Bsp_adc.c</FilePath>
             </File>
             <File>
               <FileName>power_task.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\F570_BSP\power_task.c</FilePath>
+              <FilePath>..\F405_BSP\power_task.c</FilePath>
             </File>
             <File>
               <FileName>Bsp_iic.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\F570_BSP\Bsp_iic.c</FilePath>
+              <FilePath>..\F405_BSP\Bsp_iic.c</FilePath>
             </File>
             <File>
               <FileName>Bsp_imu.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\F570_BSP\Bsp_imu.c</FilePath>
+              <FilePath>..\F405_BSP\Bsp_imu.c</FilePath>
             </File>
             <File>
               <FileName>Bsp_imu_ekf.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\F570_BSP\Bsp_imu_ekf.c</FilePath>
+              <FilePath>..\F405_BSP\Bsp_imu_ekf.c</FilePath>
             </File>
             <File>
               <FileName>Bsp_mahony.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\F570_BSP\Bsp_mahony.c</FilePath>
+              <FilePath>..\F405_BSP\Bsp_mahony.c</FilePath>
             </File>
             <File>
               <FileName>attitude_algorithm.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\F570_BSP\attitude_algorithm.c</FilePath>
+              <FilePath>..\F405_BSP\attitude_algorithm.c</FilePath>
             </File>
             <File>
               <FileName>Bsp_imu_ekf.h</FileName>
               <FileType>5</FileType>
-              <FilePath>..\F570_BSP\Inc\Bsp_imu_ekf.h</FilePath>
+              <FilePath>..\F405_BSP\Inc\Bsp_imu_ekf.h</FilePath>
             </File>
             <File>
               <FileName>Bsp_mahony.h</FileName>
               <FileType>5</FileType>
-              <FilePath>..\F570_BSP\Inc\Bsp_mahony.h</FilePath>
+              <FilePath>..\F405_BSP\Inc\Bsp_mahony.h</FilePath>
             </File>
             <File>
               <FileName>Bsp_mahony_forward.h</FileName>
               <FileType>5</FileType>
-              <FilePath>..\F570_BSP\Inc\Bsp_mahony_forward.h</FilePath>
+              <FilePath>..\F405_BSP\Inc\Bsp_mahony_forward.h</FilePath>
             </File>
             <File>
               <FileName>attitude_algorithm.h</FileName>
               <FileType>5</FileType>
-              <FilePath>..\F570_BSP\Inc\attitude_algorithm.h</FilePath>
+              <FilePath>..\F405_BSP\Inc\attitude_algorithm.h</FilePath>
             </File>
             <File>
               <FileName>attitude_common.h</FileName>
               <FileType>5</FileType>
-              <FilePath>..\F570_BSP\Inc\attitude_common.h</FilePath>
+              <FilePath>..\F405_BSP\Inc\attitude_common.h</FilePath>
             </File>
             <File>
               <FileName>SerialPllt.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\F570_BSP\SerialPllt.c</FilePath>
+              <FilePath>..\F405_BSP\SerialPllt.c</FilePath>
             </File>
             <File>
               <FileName>attitude_task.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\F570_BSP\attitude_task.c</FilePath>
+              <FilePath>..\F405_BSP\attitude_task.c</FilePath>
             </File>
             <File>
               <FileName>Control_task.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\F570_BSP\Control_task.c</FilePath>
+              <FilePath>..\F405_BSP\Control_task.c</FilePath>
             </File>
             <File>
               <FileName>Dshot.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\F570_BSP\Dshot.c</FilePath>
+              <FilePath>..\F405_BSP\Dshot.c</FilePath>
             </File>
             <File>
               <FileName>Bsp_stp23L.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\F570_BSP\Bsp_stp23L.c</FilePath>
+              <FilePath>..\F405_BSP\Bsp_stp23L.c</FilePath>
             </File>
             <File>
               <FileName>STP23L_task.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\F570_BSP\STP23L_task.c</FilePath>
+              <FilePath>..\F405_BSP\STP23L_task.c</FilePath>
             </File>
             <File>
               <FileName>Bsp_ps2.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\F570_BSP\Bsp_ps2.c</FilePath>
+              <FilePath>..\F405_BSP\Bsp_ps2.c</FilePath>
             </File>
             <File>
               <FileName>PS2_task.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\F570_BSP\PS2_task.c</FilePath>
+              <FilePath>..\F405_BSP\PS2_task.c</FilePath>
             </File>
             <File>
               <FileName>Bsp_buzzer.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\F570_BSP\Bsp_buzzer.c</FilePath>
+              <FilePath>..\F405_BSP\Bsp_buzzer.c</FilePath>
             </File>
             <File>
               <FileName>pid.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\F570_BSP\pid.c</FilePath>
+              <FilePath>..\F405_BSP\pid.c</FilePath>
             </File>
             <File>
               <FileName>show_task.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\F570_BSP\show_task.c</FilePath>
+              <FilePath>..\F405_BSP\show_task.c</FilePath>
             </File>
             <File>
               <FileName>Bluetooth_task.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\F570_BSP\Bluetooth_task.c</FilePath>
+              <FilePath>..\F405_BSP\Bluetooth_task.c</FilePath>
+            </File>
+            <File>
+              <FileName>Bsp_lc307.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\F405_BSP\Bsp_lc307.c</FilePath>
+            </File>
+            <File>
+              <FileName>LC307_task.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\F405_BSP\LC307_task.c</FilePath>
+            </File>
+            <File>
+              <FileName>Position_hold.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\F405_BSP\Position_hold.c</FilePath>
             </File>
           </Files>
         </Group>
         <Group>
-          <GroupName>F570_APP</GroupName>
+          <GroupName>F405_APP</GroupName>
           <Files>
             <File>
               <FileName>uart_callback.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\F570_APP\uart_callback.c</FilePath>
+              <FilePath>..\F405_APP\uart_callback.c</FilePath>
             </File>
           </Files>
         </Group>
