@@ -1,0 +1,56 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1100" height="1050" viewBox="0 0 1100 1050" role="img" aria-label="双姿态解算 / EKF and Mahony Estimation Pipeline">
+<title>双姿态解算 / EKF and Mahony Estimation Pipeline</title>
+<rect x="0" y="0" width="1100" height="1050" rx="20" fill="#f7f6f1" stroke="#f7f6f1" stroke-width="1"/>
+<text x="48" y="60" font-family="Microsoft YaHei, PingFang SC, Noto Sans CJK SC, sans-serif" font-size="35" font-weight="700" fill="#142d49" text-anchor="start">双姿态解算 / Dual Attitude Estimators</text>
+<text x="48" y="100" font-family="Microsoft YaHei, PingFang SC, Noto Sans CJK SC, sans-serif" font-size="23" font-weight="400" fill="#52667d" text-anchor="start">同一采集与接口，启动时选择一条解算路径</text>
+<rect x="280" y="130" width="540" height="104" rx="12" fill="#ffffff" stroke="#d8e1e8" stroke-width="1"/>
+<text x="550" y="169" font-family="Microsoft YaHei, PingFang SC, Noto Sans CJK SC, sans-serif" font-size="26" font-weight="700" fill="#2458ac" text-anchor="middle">IMU Input / 共同输入</text>
+<text x="550" y="207" font-family="Microsoft YaHei, PingFang SC, Noto Sans CJK SC, sans-serif" font-size="22" font-weight="400" fill="#52667d" text-anchor="middle">Accel + Gyro · SI units / 单位换算</text>
+<line x1="550" y1="234" x2="550" y2="254" stroke="#087f82" stroke-width="2"/>
+<line x1="293" y1="254" x2="807" y2="254" stroke="#087f82" stroke-width="2"/>
+<line x1="293" y1="254" x2="293" y2="280" stroke="#087f82" stroke-width="2"/>
+<polygon points="287,270 299,270 293,280" fill="#087f82"/>
+<line x1="807" y1="254" x2="807" y2="280" stroke="#087f82" stroke-width="2"/>
+<polygon points="801,270 813,270 807,280" fill="#087f82"/>
+<rect x="48" y="280" width="490" height="442" rx="12" fill="#ffffff" stroke="#d8e1e8" stroke-width="1"/>
+<rect x="48" y="280" width="490" height="7" rx="3" fill="#2458ac" stroke="#2458ac" stroke-width="1"/>
+<text x="72" y="326" font-family="Microsoft YaHei, PingFang SC, Noto Sans CJK SC, sans-serif" font-size="29" font-weight="700" fill="#2458ac" text-anchor="start">EKF / 扩展卡尔曼</text>
+<text x="72" y="359" font-family="Microsoft YaHei, PingFang SC, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#52667d" text-anchor="start">Quaternion + bx / by · 六状态</text>
+<rect x="72" y="384" width="442" height="78" rx="8" fill="#f7fafc" stroke="#d8e1e8" stroke-width="1"/>
+<text x="90" y="414" font-family="Microsoft YaHei, PingFang SC, Noto Sans CJK SC, sans-serif" font-size="23" font-weight="700" fill="#142d49" text-anchor="start">Predict / 状态预测</text>
+<text x="90" y="444" font-family="Microsoft YaHei, PingFang SC, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#52667d" text-anchor="start">四元数传播 · Covariance P</text>
+<rect x="72" y="480" width="442" height="78" rx="8" fill="#f7fafc" stroke="#d8e1e8" stroke-width="1"/>
+<text x="90" y="510" font-family="Microsoft YaHei, PingFang SC, Noto Sans CJK SC, sans-serif" font-size="23" font-weight="700" fill="#142d49" text-anchor="start">Update / 观测更新</text>
+<text x="90" y="540" font-family="Microsoft YaHei, PingFang SC, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#52667d" text-anchor="start">重力方向观测 · Adaptive R</text>
+<rect x="72" y="576" width="442" height="78" rx="8" fill="#f7fafc" stroke="#d8e1e8" stroke-width="1"/>
+<text x="90" y="606" font-family="Microsoft YaHei, PingFang SC, Noto Sans CJK SC, sans-serif" font-size="23" font-weight="700" fill="#142d49" text-anchor="start">Normalize / 归一化</text>
+<text x="90" y="636" font-family="Microsoft YaHei, PingFang SC, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#52667d" text-anchor="start">更新 q、bias_gx、bias_gy</text>
+<text x="72" y="701" font-family="Consolas, monospace" font-size="19" font-weight="400" fill="#52667d" text-anchor="start">Bsp_imu_ekf.c</text>
+<rect x="562" y="280" width="490" height="442" rx="12" fill="#ffffff" stroke="#d8e1e8" stroke-width="1"/>
+<rect x="562" y="280" width="490" height="7" rx="3" fill="#087f82" stroke="#087f82" stroke-width="1"/>
+<text x="586" y="326" font-family="Microsoft YaHei, PingFang SC, Noto Sans CJK SC, sans-serif" font-size="29" font-weight="700" fill="#087f82" text-anchor="start">Mahony / 互补滤波</text>
+<text x="586" y="359" font-family="Microsoft YaHei, PingFang SC, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#52667d" text-anchor="start">Nonlinear Complementary Filter</text>
+<rect x="586" y="384" width="442" height="78" rx="8" fill="#f7fafc" stroke="#d8e1e8" stroke-width="1"/>
+<text x="604" y="414" font-family="Microsoft YaHei, PingFang SC, Noto Sans CJK SC, sans-serif" font-size="23" font-weight="700" fill="#142d49" text-anchor="start">Gravity Error / 重力误差</text>
+<text x="604" y="444" font-family="Microsoft YaHei, PingFang SC, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#52667d" text-anchor="start">实测与预测重力方向叉乘</text>
+<rect x="586" y="480" width="442" height="78" rx="8" fill="#f7fafc" stroke="#d8e1e8" stroke-width="1"/>
+<text x="604" y="510" font-family="Microsoft YaHei, PingFang SC, Noto Sans CJK SC, sans-serif" font-size="23" font-weight="700" fill="#142d49" text-anchor="start">PI Correction / 误差修正</text>
+<text x="604" y="540" font-family="Microsoft YaHei, PingFang SC, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#52667d" text-anchor="start">用重力误差修正角速度</text>
+<rect x="586" y="576" width="442" height="78" rx="8" fill="#f7fafc" stroke="#d8e1e8" stroke-width="1"/>
+<text x="604" y="606" font-family="Microsoft YaHei, PingFang SC, Noto Sans CJK SC, sans-serif" font-size="23" font-weight="700" fill="#142d49" text-anchor="start">Propagate / 四元数传播</text>
+<text x="604" y="636" font-family="Microsoft YaHei, PingFang SC, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#52667d" text-anchor="start">积分姿态并归一化</text>
+<text x="586" y="701" font-family="Consolas, monospace" font-size="19" font-weight="400" fill="#52667d" text-anchor="start">Bsp_mahony.c</text>
+<line x1="293" y1="722" x2="293" y2="754" stroke="#087f82" stroke-width="2"/>
+<line x1="807" y1="722" x2="807" y2="754" stroke="#087f82" stroke-width="2"/>
+<line x1="293" y1="754" x2="807" y2="754" stroke="#087f82" stroke-width="2"/>
+<line x1="550" y1="754" x2="550" y2="786" stroke="#087f82" stroke-width="2"/>
+<polygon points="544,776 556,776 550,786" fill="#087f82"/>
+<rect x="200" y="786" width="700" height="94" rx="12" fill="#ffffff" stroke="#d8e1e8" stroke-width="1"/>
+<text x="550" y="823" font-family="Microsoft YaHei, PingFang SC, Noto Sans CJK SC, sans-serif" font-size="27" font-weight="700" fill="#2458ac" text-anchor="middle">Unified Euler / 统一姿态输出</text>
+<text x="550" y="857" font-family="Microsoft YaHei, PingFang SC, Noto Sans CJK SC, sans-serif" font-size="21" font-weight="400" fill="#52667d" text-anchor="middle">Attitude_GetEuler · Zero reference / 零点参考</text>
+<line x1="550" y1="880" x2="550" y2="915" stroke="#087f82" stroke-width="2"/>
+<polygon points="544,905 556,905 550,915" fill="#087f82"/>
+<rect x="200" y="915" width="700" height="94" rx="12" fill="#ffffff" stroke="#d8e1e8" stroke-width="1"/>
+<text x="550" y="952" font-family="Microsoft YaHei, PingFang SC, Noto Sans CJK SC, sans-serif" font-size="26" font-weight="700" fill="#087f82" text-anchor="middle">Snapshot + FIFO / 状态快照与历史缓冲</text>
+<text x="550" y="986" font-family="Microsoft YaHei, PingFang SC, Noto Sans CJK SC, sans-serif" font-size="21" font-weight="400" fill="#52667d" text-anchor="middle">姿态 + IMU + sample_tick + sequence</text>
+</svg>

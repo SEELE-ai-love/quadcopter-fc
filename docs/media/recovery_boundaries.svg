@@ -1,0 +1,76 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="815" viewBox="0 0 1200 815" role="img" aria-label="恢复边界 / Reception, Estimation and Position Control">
+<title>恢复边界 / Reception, Estimation and Position Control</title>
+<rect x="0" y="0" width="1200" height="815" rx="20" fill="#f7f6f1" stroke="#f7f6f1" stroke-width="1"/>
+<text x="48" y="59" font-family="Microsoft YaHei, PingFang SC, Noto Sans CJK SC, sans-serif" font-size="35" font-weight="700" fill="#142d49" text-anchor="start">恢复边界 / Recovery Boundaries</text>
+<text x="48" y="99" font-family="Microsoft YaHei, PingFang SC, Noto Sans CJK SC, sans-serif" font-size="22" font-weight="400" fill="#52667d" text-anchor="start">接收维护、估计有效性与位置控制重入，各自处理各自的状态</text>
+<text x="48" y="143" font-family="Microsoft YaHei, PingFang SC, Noto Sans CJK SC, sans-serif" font-size="18" font-weight="700" fill="#2458ac" text-anchor="start">01  RECEPTION / 接收维护</text>
+<rect x="48" y="160" width="340" height="158" rx="12" fill="#ffffff" stroke="#d8e1e8" stroke-width="1"/>
+<rect x="64" y="178" width="4" height="25" rx="2" fill="#2458ac" stroke="#2458ac" stroke-width="1"/>
+<text x="78" y="200" font-family="Microsoft YaHei, PingFang SC, Noto Sans CJK SC, sans-serif" font-size="23" font-weight="700" fill="#142d49" text-anchor="start">Rx Fault / 接收异常</text>
+<text x="68" y="239" font-family="Microsoft YaHei, PingFang SC, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#52667d" text-anchor="start">UART error · Queue overflow</text>
+<text x="68" y="270" font-family="Microsoft YaHei, PingFang SC, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#52667d" text-anchor="start">记录故障代数与维护请求</text>
+<text x="68" y="301" font-family="Consolas, monospace" font-size="16" font-weight="400" fill="#2458ac" text-anchor="start">uart_callback.c</text>
+<rect x="430" y="160" width="340" height="158" rx="12" fill="#ffffff" stroke="#d8e1e8" stroke-width="1"/>
+<rect x="446" y="178" width="4" height="25" rx="2" fill="#2458ac" stroke="#2458ac" stroke-width="1"/>
+<text x="460" y="200" font-family="Microsoft YaHei, PingFang SC, Noto Sans CJK SC, sans-serif" font-size="23" font-weight="700" fill="#142d49" text-anchor="start">Owner Task / 唯一维护者</text>
+<text x="450" y="239" font-family="Microsoft YaHei, PingFang SC, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#52667d" text-anchor="start">READY gate → 接收维护</text>
+<text x="450" y="270" font-family="Microsoft YaHei, PingFang SC, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#52667d" text-anchor="start">Start / Abort 在临界区外</text>
+<text x="450" y="301" font-family="Consolas, monospace" font-size="16" font-weight="400" fill="#2458ac" text-anchor="start">LC307_ServiceRx()</text>
+<rect x="812" y="160" width="340" height="158" rx="12" fill="#ffffff" stroke="#d8e1e8" stroke-width="1"/>
+<rect x="828" y="178" width="4" height="25" rx="2" fill="#2458ac" stroke="#2458ac" stroke-width="1"/>
+<text x="842" y="200" font-family="Microsoft YaHei, PingFang SC, Noto Sans CJK SC, sans-serif" font-size="21" font-weight="700" fill="#142d49" text-anchor="start">Frame Acceptance / 新观测</text>
+<text x="832" y="239" font-family="Microsoft YaHei, PingFang SC, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#52667d" text-anchor="start">Envelope + XOR + timespan</text>
+<text x="832" y="270" font-family="Microsoft YaHei, PingFang SC, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#52667d" text-anchor="start">有效完整帧更新接收时间</text>
+<text x="832" y="301" font-family="Consolas, monospace" font-size="16" font-weight="400" fill="#2458ac" text-anchor="start">LC307_Publish()</text>
+<line x1="390" y1="240" x2="428" y2="240" stroke="#2458ac" stroke-width="2"/>
+<polygon points="418,234 418,246 428,240" fill="#2458ac"/>
+<line x1="772" y1="240" x2="810" y2="240" stroke="#2458ac" stroke-width="2"/>
+<polygon points="800,234 800,246 810,240" fill="#2458ac"/>
+<text x="48" y="357" font-family="Microsoft YaHei, PingFang SC, Noto Sans CJK SC, sans-serif" font-size="18" font-weight="700" fill="#087f82" text-anchor="start">02  ESTIMATION / 估计有效性</text>
+<rect x="48" y="374" width="340" height="158" rx="12" fill="#ffffff" stroke="#d8e1e8" stroke-width="1"/>
+<rect x="64" y="392" width="4" height="25" rx="2" fill="#087f82" stroke="#087f82" stroke-width="1"/>
+<text x="78" y="414" font-family="Microsoft YaHei, PingFang SC, Noto Sans CJK SC, sans-serif" font-size="23" font-weight="700" fill="#142d49" text-anchor="start">Sample Gap / 样本不连续</text>
+<text x="68" y="453" font-family="Microsoft YaHei, PingFang SC, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#52667d" text-anchor="start">FIFO overflow · Sequence gap</text>
+<text x="68" y="484" font-family="Microsoft YaHei, PingFang SC, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#52667d" text-anchor="start">Snapshot age / 快照过期</text>
+<text x="68" y="515" font-family="Consolas, monospace" font-size="16" font-weight="400" fill="#087f82" text-anchor="start">Attitude_FifoPop()</text>
+<rect x="430" y="374" width="340" height="158" rx="12" fill="#ffffff" stroke="#d8e1e8" stroke-width="1"/>
+<rect x="446" y="392" width="4" height="25" rx="2" fill="#087f82" stroke="#087f82" stroke-width="1"/>
+<text x="460" y="414" font-family="Microsoft YaHei, PingFang SC, Noto Sans CJK SC, sans-serif" font-size="23" font-weight="700" fill="#142d49" text-anchor="start">Pause / 暂停估计</text>
+<text x="450" y="453" font-family="Microsoft YaHei, PingFang SC, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#52667d" text-anchor="start">estimate_valid = 0</text>
+<text x="450" y="484" font-family="Microsoft YaHei, PingFang SC, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#52667d" text-anchor="start">保留位置、速度和历史速度</text>
+<text x="450" y="515" font-family="Consolas, monospace" font-size="16" font-weight="400" fill="#087f82" text-anchor="start">LC307_EstimatorPause()</text>
+<rect x="812" y="374" width="340" height="158" rx="12" fill="#ffffff" stroke="#d8e1e8" stroke-width="1"/>
+<rect x="828" y="392" width="4" height="25" rx="2" fill="#087f82" stroke="#087f82" stroke-width="1"/>
+<text x="842" y="414" font-family="Microsoft YaHei, PingFang SC, Noto Sans CJK SC, sans-serif" font-size="23" font-weight="700" fill="#142d49" text-anchor="start">Re-establish / 重新建立</text>
+<text x="832" y="453" font-family="Microsoft YaHei, PingFang SC, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#52667d" text-anchor="start">新观测 + 新鲜 IMU</text>
+<text x="832" y="484" font-family="Microsoft YaHei, PingFang SC, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#52667d" text-anchor="start">恢复首帧不跨缺口补积分</text>
+<text x="832" y="515" font-family="Consolas, monospace" font-size="16" font-weight="400" fill="#087f82" text-anchor="start">LC307_EstimatorUpdateSample()</text>
+<line x1="390" y1="454" x2="428" y2="454" stroke="#087f82" stroke-width="2"/>
+<polygon points="418,448 418,460 428,454" fill="#087f82"/>
+<line x1="772" y1="454" x2="810" y2="454" stroke="#087f82" stroke-width="2"/>
+<polygon points="800,448 800,460 810,454" fill="#087f82"/>
+<text x="48" y="571" font-family="Microsoft YaHei, PingFang SC, Noto Sans CJK SC, sans-serif" font-size="18" font-weight="700" fill="#b57a29" text-anchor="start">03  POSITION CONTROL / 位置控制</text>
+<rect x="48" y="588" width="340" height="158" rx="12" fill="#ffffff" stroke="#d8e1e8" stroke-width="1"/>
+<rect x="64" y="606" width="4" height="25" rx="2" fill="#b57a29" stroke="#b57a29" stroke-width="1"/>
+<text x="78" y="628" font-family="Microsoft YaHei, PingFang SC, Noto Sans CJK SC, sans-serif" font-size="23" font-weight="700" fill="#142d49" text-anchor="start">Input Guards / 控制门控</text>
+<text x="68" y="667" font-family="Microsoft YaHei, PingFang SC, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#52667d" text-anchor="start">输入新鲜度 · 运动门限</text>
+<text x="68" y="698" font-family="Microsoft YaHei, PingFang SC, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#52667d" text-anchor="start">Position error / 位置超差</text>
+<text x="68" y="729" font-family="Consolas, monospace" font-size="16" font-weight="400" fill="#b57a29" text-anchor="start">Control_PositionHold()</text>
+<rect x="430" y="588" width="340" height="158" rx="12" fill="#ffffff" stroke="#d8e1e8" stroke-width="1"/>
+<rect x="446" y="606" width="4" height="25" rx="2" fill="#b57a29" stroke="#b57a29" stroke-width="1"/>
+<text x="460" y="628" font-family="Microsoft YaHei, PingFang SC, Noto Sans CJK SC, sans-serif" font-size="21" font-weight="700" fill="#142d49" text-anchor="start">WAIT / FAULT · 等待与锁存</text>
+<text x="450" y="667" font-family="Microsoft YaHei, PingFang SC, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#52667d" text-anchor="start">清零 roll_add / pitch_add</text>
+<text x="450" y="698" font-family="Microsoft YaHei, PingFang SC, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#52667d" text-anchor="start">FAULT 保持锁存状态</text>
+<text x="450" y="729" font-family="Consolas, monospace" font-size="16" font-weight="400" fill="#b57a29" text-anchor="start">Control_PosDrop()</text>
+<rect x="812" y="588" width="340" height="158" rx="12" fill="#ffffff" stroke="#d8e1e8" stroke-width="1"/>
+<rect x="828" y="606" width="4" height="25" rx="2" fill="#b57a29" stroke="#b57a29" stroke-width="1"/>
+<text x="842" y="628" font-family="Microsoft YaHei, PingFang SC, Noto Sans CJK SC, sans-serif" font-size="23" font-weight="700" fill="#142d49" text-anchor="start">Guarded Entry / 受控重入</text>
+<text x="832" y="667" font-family="Microsoft YaHei, PingFang SC, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#52667d" text-anchor="start">WAIT → 捕获新目标</text>
+<text x="832" y="698" font-family="Microsoft YaHei, PingFang SC, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#52667d" text-anchor="start">FAULT → 先停止或复位位置状态</text>
+<text x="832" y="729" font-family="Consolas, monospace" font-size="16" font-weight="400" fill="#b57a29" text-anchor="start">Control_PosReset()</text>
+<line x1="390" y1="668" x2="428" y2="668" stroke="#b57a29" stroke-width="2"/>
+<polygon points="418,662 418,674 428,668" fill="#b57a29"/>
+<line x1="772" y1="668" x2="810" y2="668" stroke="#b57a29" stroke-width="2"/>
+<polygon points="800,662 800,674 810,668" fill="#b57a29"/>
+<text x="48" y="791" font-family="Microsoft YaHei, PingFang SC, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#52667d" text-anchor="start">Scope / 范围：位置状态复位不等于 MCU 复位，观测恢复也不直接启动电机。</text>
+</svg>

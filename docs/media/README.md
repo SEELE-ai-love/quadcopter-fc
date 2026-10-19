@@ -4,7 +4,9 @@
 
 | 文件 | 内容与出处 | 使用边界 |
 | --- | --- | --- |
-| [project_overview.svg](project_overview.svg) | 项目展示封面 | 软件模块主题，不是实物照片或硬件性能证据 |
+| [project_overview.svg](project_overview.svg) | 自研四旋翼飞控展示封面 | 软件模块主题，不是实物照片或硬件性能证据 |
+| [dual_attitude_estimators.svg](dual_attitude_estimators.svg) | EKF / Mahony 双解算路线 | 启动时选择算法，图示不表示两者同时融合 |
+| [recovery_boundaries.svg](recovery_boundaries.svg) | 接收、估计与位置控制恢复边界 | 描述源码中的状态路径 |
 | [attitude_ekf_static.png](attitude_ekf_static.png) | 2026-09-22 22:49:31 串口截图，作者确认EKF | 与另一截图单位及静止条件相同；截图无完整校准记录和原始日志 |
 | [attitude_mahony_static.png](attitude_mahony_static.png) | 2026-09-22 22:52:08 串口截图，作者确认Mahony | 同上；Yaw参考值不同，不直接比较绝对值 |
 | [attitude_matlab_tracking.png](attitude_matlab_tracking.png) | 2026-09-21 MATLAB 姿态分析截图 | 图例是一维KF与四元数EKF；不作为EKF/Mahony实机同数据对照 |
