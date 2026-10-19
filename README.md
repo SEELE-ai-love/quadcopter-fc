@@ -167,6 +167,8 @@ quadcopter-fc/
 
 [Media Index / 图片索引与测试条件](docs/media/README.md)
 
+[MATLAB 油门拟合工具 / Throttle Model Analysis](analysis/matlab/README.md)：读取测量 CSV，生成二次模型、拟合对照与残差图，并对照固件现有系数。
+
 <a id="build"></a>
 ## 技术栈与构建 / Platform & Build
 

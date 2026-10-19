@@ -1,0 +1,11 @@
+# Exclude third-party libraries from the project's language breakdown.
+Drivers/** linguist-vendored=true
+Middlewares/** linguist-vendored=true
+GCC/startup_stm32f405xx.s linguist-vendored=true
+MDK-ARM/startup_stm32f405xx.s linguist-vendored=true
+
+# Keep build scripts and numerical analysis classified by their actual language.
+CMakeLists.txt linguist-language=CMake linguist-detectable=true
+**/CMakeLists.txt linguist-language=CMake linguist-detectable=true
+*.cmake linguist-language=CMake linguist-detectable=true
+analysis/**/*.m linguist-language=MATLAB linguist-detectable=true
